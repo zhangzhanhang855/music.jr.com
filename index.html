@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>GitHub仓库音乐播放器</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .player {
+      width: 320px;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    .title {
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background: #444;
+      border-radius: 3px;
+      cursor: pointer;
+      margin: 12px 0;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: #00e5ff;
+      border-radius: 3px;
+    }
+
+    .controls button {
+      background: none;
+      border: 1px solid #00e5ff;
+      color: #00e5ff;
+      padding: 6px 12px;
+      margin: 4px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      background: #00e5ff;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+<div class="player">
+  <div class="title" id="songTitle">加载中...</div>
+
+  <div class="progress-container" id="progressContainer">
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="prevSong()">上一首</button>
+    <button onclick="togglePlay()" id="playBtn">播放</button>
+    <button onclick="nextSong()">下一首</button>
+    <button onclick="toggleLoop()" id="loopBtn">单曲循环</button>
+  </div>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+  // 替换为你GitHub仓库raw直链地址
+  const songs = [
+    {
+      name: "Song One",
+      url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.mp3"
+    },
+    {
+      name: "Song Two",
+      url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.mp3"
+    },
+    {
+      name: "Song Three",
+      url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.mp3"
+    }
+  ];
+
+  let index = 0;
+  let isPlaying = false;
+
+  const audio = document.getElementById("audio");
+  const title = document.getElementById("songTitle");
+  const progress = document.getElementById("progress");
+  const playBtn = document.getElementById("playBtn");
+  const loopBtn = document.getElementById("loopBtn");
+  const progressContainer = document.getElementById("progressContainer");
+
+  function loadSong(i) {
+    audio.src = songs[i].url;
+    title.textContent = songs[i].name;
+  }
+
+  function togglePlay() {
+    if (isPlaying) {
+      audio.pause();
+      playBtn.textContent = "播放";
+    } else {
+      audio.play();
+      playBtn.textContent = "暂停";
+    }
+    isPlaying = !isPlaying;
+  }
+
+  function nextSong() {
+    index = (index + 1) % songs.length;
+    loadSong(index);
+    audio.play();
+    isPlaying = true;
+    playBtn.textContent = "暂停";
+  }
+
+  function prevSong() {
+    index = (index - 1 + songs.length) % songs.length;
+    loadSong(index);
+    audio.play();
+    isPlaying = true;
+    playBtn.textContent = "暂停";
+  }
+
+  function toggleLoop() {
+    audio.loop = !audio.loop;
+    loopBtn.textContent = audio.loop ? "循环中" : "单曲循环";
+  }
+
+  audio.addEventListener("timeupdate", () => {
+    const percent = (audio.currentTime / audio.duration) * 100;
+    progress.style.width = percent + "%";
+  });
+
+  progressContainer.addEventListener("click", e => {
+    const width = progressContainer.clientWidth;
+    const clickX = e.offsetX;
+    const duration = audio.duration;
+    audio.currentTime = (clickX / width) * duration;
+  });
+
+  audio.addEventListener("ended", () => {
+    if (!audio.loop) nextSong();
+  });
+
+  loadSong(index);
+</script>
+
+</body>
+</html>
