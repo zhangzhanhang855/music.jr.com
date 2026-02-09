@@ -2,114 +2,69 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>斗地主人机对战</title>
+<title>斗地主豪华人机对战</title>
 <style>
-body{background:#114422;color:white;font-family:Arial;text-align:center}
-.card{display:inline-block;padding:6px 10px;margin:4px;border:1px solid #fff;border-radius:6px;background:#1f7a4d;cursor:pointer}
-.selected{background:#ffd966;color:black}
-.area{margin:15px}
-button{padding:8px 16px;border:none;border-radius:8px;cursor:pointer}
+body{background:linear-gradient(#0a3d2e,#021);color:#fff;font-family:Arial;text-align:center}
+.table{max-width:900px;margin:auto;padding:20px}
+.card{display:inline-block;padding:8px 12px;margin:4px;border-radius:8px;border:1px solid #fff;background:#1e8449;cursor:pointer;transition:.2s}
+.card:hover{transform:translateY(-4px)}
+.selected{background:#ffd966;color:#000}
+.panel{background:rgba(0,0,0,.4);padding:15px;border-radius:16px;margin:10px}
+button{padding:10px 18px;border:none;border-radius:10px;background:#f1c40f;font-weight:bold;cursor:pointer}
+button:hover{opacity:.85}
 </style>
 </head>
 <body>
-<h1>🃏 斗地主（人机对战简化版）</h1>
-<p>规则：简化为单张出牌，比大小（3最小，王最大）</p>
+<div class="table">
+<h1>🃏 斗地主豪华版</h1>
+<h2>金币：<span id="coins">1000</span></h2>
 
-<div class="area">
-<h2>你的手牌</h2>
+<div class="panel">
+<h3>你的手牌</h3>
 <div id="player"></div>
 </div>
 
-<div class="area">
+<div class="panel">
+<button onclick="autoSort()">自动理牌</button>
 <button onclick="playCard()">出牌</button>
 <button onclick="passTurn()">不要</button>
-<button onclick="startGame()">重新开始</button>
+<button onclick="startGame()">新一局</button>
 </div>
 
-<div class="area">
-<h2>电脑A剩余：<span id="ai1">17</span> 张</h2>
-<h2>电脑B剩余：<span id="ai2">17</span> 张</h2>
+<div class="panel">
+<h3>电脑A剩余：<span id="ai1">17</span> 张 | 电脑B剩余：<span id="ai2">17</span> 张</h3>
+<h3>当前牌：<span id="current">无</span></h3>
 </div>
-
-<h2>当前牌：<span id="current">无</span></h2>
+</div>
 
 <script>
 const ranks=['3','4','5','6','7','8','9','10','J','Q','K','A','2','小王','大王'];
-let deck=[];
-let playerHand=[], ai1Hand=[], ai2Hand=[];
-let currentCard=null;
-let selectedIndex=null;
+let deck=[],playerHand=[],ai1Hand=[],ai2Hand=[];
+let currentCard=null,selectedIndex=null,coins=1000;
 
-function buildDeck(){
-  deck=[];
-  for(let i=0;i<13;i++){
-    for(let j=0;j<4;j++) deck.push(ranks[i]);
-  }
-  deck.push('小王','大王');
-}
+function buildDeck(){deck=[];for(let i=0;i<13;i++)for(let j=0;j<4;j++)deck.push(ranks[i]);deck.push('小王','大王');}
+function shuffle(){for(let i=deck.length-1;i>0;i--){let r=Math.floor(Math.random()*(i+1));[deck[i],deck[r]]=[deck[r],deck[i]];}}
 
-function shuffle(){
-  for(let i=deck.length-1;i>0;i--){
-    let r=Math.floor(Math.random()*(i+1));
-    [deck[i],deck[r]]=[deck[r],deck[i]];
-  }
-}
+function startGame(){buildDeck();shuffle();playerHand=deck.slice(0,17);ai1Hand=deck.slice(17,34);ai2Hand=deck.slice(34,51);currentCard=null;autoSort();render();}
 
-function startGame(){
-  buildDeck(); shuffle();
-  playerHand=deck.slice(0,17);
-  ai1Hand=deck.slice(17,34);
-  ai2Hand=deck.slice(34,51);
-  currentCard=null;
-  render();
-}
+function rankValue(c){return ranks.indexOf(c)}
 
-function render(){
-  const p=document.getElementById('player');
-  p.innerHTML='';
-  playerHand.forEach((c,i)=>{
-    const d=document.createElement('div');
-    d.className='card'+(selectedIndex===i?' selected':'');
-    d.innerText=c;
-    d.onclick=()=>selectedIndex=i;
-    p.appendChild(d);
-  });
-  document.getElementById('ai1').innerText=ai1Hand.length;
-  document.getElementById('ai2').innerText=ai2Hand.length;
-  document.getElementById('current').innerText=currentCard||'无';
-}
+function autoSort(){playerHand.sort((a,b)=>rankValue(a)-rankValue(b));render();}
 
-function rankValue(c){ return ranks.indexOf(c); }
+function render(){const p=document.getElementById('player');p.innerHTML='';playerHand.forEach((c,i)=>{const d=document.createElement('div');d.className='card'+(selectedIndex===i?' selected':'');d.innerText=c;d.onclick=()=>{selectedIndex=i;render();};p.appendChild(d);});
+ document.getElementById('ai1').innerText=ai1Hand.length;
+ document.getElementById('ai2').innerText=ai2Hand.length;
+ document.getElementById('current').innerText=currentCard||'无';
+ document.getElementById('coins').innerText=coins;}
 
-function playCard(){
-  if(selectedIndex===null) return;
-  const card=playerHand[selectedIndex];
-  if(currentCard && rankValue(card)<=rankValue(currentCard)){
-    alert('必须出更大的牌！'); return;
-  }
-  currentCard=card;
-  playerHand.splice(selectedIndex,1);
-  selectedIndex=null;
-  aiTurn(ai1Hand);
-  aiTurn(ai2Hand);
-  checkWin();
-  render();
-}
+function playCard(){if(selectedIndex===null)return;const card=playerHand[selectedIndex];if(currentCard&&rankValue(card)<=rankValue(currentCard)){alert('必须更大！');return;}currentCard=card;playerHand.splice(selectedIndex,1);selectedIndex=null;aiTurn(ai1Hand);aiTurn(ai2Hand);checkWin();render();}
 
-function aiTurn(hand){
-  let playable=hand.filter(c=>!currentCard||rankValue(c)>rankValue(currentCard));
-  if(playable.length===0) return;
-  playable.sort((a,b)=>rankValue(a)-rankValue(b));
-  currentCard=playable[0];
-  hand.splice(hand.indexOf(currentCard),1);
-}
+function aiTurn(hand){let playable=hand.filter(c=>!currentCard||rankValue(c)>rankValue(currentCard));if(playable.length===0)return;playable.sort((a,b)=>rankValue(a)-rankValue(b));currentCard=playable[0];hand.splice(hand.indexOf(currentCard),1);}
 
-function passTurn(){ currentCard=null; }
+function passTurn(){currentCard=null;}
 
-function checkWin(){
-  if(playerHand.length===0) alert('🎉 你赢了！');
-  if(ai1Hand.length===0||ai2Hand.length===0) alert('😵 电脑赢了！');
-}
+function checkWin(){if(playerHand.length===0){coins+=100;alert('🎉 你赢了！+100金币');startGame();}
+ if(ai1Hand.length===0||ai2Hand.length===0){coins-=50;alert('😵 电脑赢了！-50金币');startGame();}}
 
 startGame();
 </script>
