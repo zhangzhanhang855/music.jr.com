@@ -106,3 +106,33 @@ startGame();
 </script>
 </body>
 </html>
+<!-- 登录注册模块 -->
+<div class="panel" id="authPanel">
+<h3>账号系统</h3>
+<input id="user" placeholder="用户名"><br><br>
+<input id="pass" type="password" placeholder="密码"><br><br>
+<button onclick="register()">注册</button>
+<button onclick="login()">登录</button>
+<div id="authMsg"></div>
+</div>
+
+<script>
+const API='http://ARIVMW83BKJPVHNCRQC1.redug8dqjjktoapmdfmqymrvi0iupi.com:23001';
+
+async function register(){
+ const u=user.value,p=pass.value;
+ const r=await fetch(API+'/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({u,p})});
+ authMsg.innerText=await r.text();
+}
+
+async function login(){
+ const u=user.value,p=pass.value;
+ const r=await fetch(API+'/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({u,p})});
+ const t=await r.text();
+ if(t==='ok'){localStorage.setItem('user',u);authMsg.innerText='登录成功';}
+ else authMsg.innerText=t;
+}
+</script>
+</body>
+</html>
+
