@@ -2,95 +2,403 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>ZZH Music Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZZH Music Player - 音乐播放器</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #111;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0a0a;
       color: #fff;
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-    }
-
-    .player {
-      width: 320px;
-      background: #1e1e1e;
       padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.6);
-      text-align: center;
+      overflow: hidden;
     }
 
+    /* 动态背景 */
+    .bg-blur {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      filter: blur(40px) brightness(0.3);
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      z-index: 0;
+    }
+
+    .bg-blur.active {
+      opacity: 1;
+    }
+
+    /* 容器 */
+    .container {
+      display: flex;
+      gap: 20px;
+      max-width: 1000px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* 播放器主体 */
+    .player {
+      width: 100%;
+      max-width: 360px;
+      background: rgba(30, 30, 30, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.2);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      text-align: center;
+      animation: slideIn 0.6s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 封面 */
     .cover {
       width: 100%;
-      height: 180px;
-      background: #333;
-      margin-bottom: 12px;
-      border-radius: 12px;
+      height: 220px;
+      background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+      margin-bottom: 20px;
+      border-radius: 16px;
       object-fit: cover;
+      box-shadow: 0 10px 30px rgba(0, 229, 255, 0.15);
+      border: 2px solid rgba(0, 229, 255, 0.1);
+      animation: coverRotate 0.6s ease;
+    }
+
+    @keyframes coverRotate {
+      from {
+        transform: scale(0.8) rotateY(10deg);
+      }
+      to {
+        transform: scale(1) rotateY(0);
+      }
+    }
+
+    /* 标题和信息 */
+    .song-info {
+      margin-bottom: 20px;
     }
 
     .title {
-      margin-bottom: 10px;
       font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #00e5ff;
+      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
+    .time-info {
+      font-size: 12px;
+      color: #888;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    /* 进度条 */
     .progress-container {
       width: 100%;
-      height: 6px;
-      background: #444;
-      border-radius: 3px;
+      height: 8px;
+      background: rgba(68, 68, 68, 0.6);
+      border-radius: 4px;
       cursor: pointer;
-      margin: 12px 0;
+      margin: 20px 0;
+      overflow: hidden;
+      transition: height 0.2s;
+    }
+
+    .progress-container:hover {
+      height: 10px;
     }
 
     .progress {
       height: 100%;
       width: 0%;
-      background: #00e5ff;
-      border-radius: 3px;
+      background: linear-gradient(90deg, #00e5ff 0%, #00d4ff 100%);
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+      transition: width 0.1s linear;
+    }
+
+    /* 控制按钮 */
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .controls button {
-      background: none;
-      border: 1px solid #00e5ff;
-      color: #00e5ff;
-      padding: 6px 12px;
-      margin: 4px;
+      background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
+      border: none;
+      color: #000;
+      padding: 10px 16px;
       border-radius: 8px;
       cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
+      min-width: 70px;
     }
 
     .controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5);
+    }
+
+    .controls button:active {
+      transform: translateY(0);
+    }
+
+    #playBtn {
+      min-width: 90px;
+      font-size: 16px;
+    }
+
+    /* 歌曲列表 */
+    .playlist {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(30, 30, 30, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.2);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      animation: slideIn 0.6s ease 0.1s both;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .playlist::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .playlist::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    .playlist::-webkit-scrollbar-thumb {
       background: #00e5ff;
-      color: #000;
+      border-radius: 10px;
+    }
+
+    .playlist::-webkit-scrollbar-thumb:hover {
+      background: #00d4ff;
+    }
+
+    .playlist-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #00e5ff;
+      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .playlist-title::before {
+      content: "♫";
+      font-size: 20px;
+    }
+
+    .song-item {
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .song-item:hover {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: rgba(0, 229, 255, 0.3);
+      transform: translateX(5px);
+    }
+
+    .song-item.active {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2) 0%, rgba(0, 212, 255, 0.2) 100%);
+      border-color: #00e5ff;
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+    }
+
+    .song-number {
+      font-size: 12px;
+      color: #888;
+      min-width: 25px;
+      font-weight: 600;
+    }
+
+    .song-item.active .song-number {
+      color: #00e5ff;
+    }
+
+    .song-name {
+      flex: 1;
+      text-align: left;
+      font-size: 14px;
+      color: #ddd;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-item.active .song-name {
+      color: #00e5ff;
+      font-weight: 600;
+    }
+
+    .play-icon {
+      font-size: 12px;
+      color: #00e5ff;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .song-item.active .play-icon {
+      opacity: 1;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .player {
+        max-width: 100%;
+      }
+
+      .playlist {
+        max-width: 100%;
+      }
+    }
+
+    /* 音频元素隐藏 */
+    audio {
+      display: none;
+    }
+
+    /* 加载动画 */
+    .loading {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* 音量可视化指示 */
+    .playing-indicator {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      background: #00e5ff;
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.5);
+      }
     }
   </style>
 </head>
 <body>
 
-<div class="player">
-  <img src="" id="cover" class="cover" alt="歌曲封面" />
-  <div class="title" id="songTitle">加载中...</div>
+<!-- 动态背景 -->
+<div class="bg-blur" id="bgBlur"></div>
 
-  <div class="progress-container" id="progressContainer">
-    <div class="progress" id="progress"></div>
+<!-- 主容器 -->
+<div class="container">
+  <!-- 播放器 -->
+  <div class="player">
+    <img src="" id="cover" class="cover" alt="歌曲封面" />
+    
+    <div class="song-info">
+      <div class="title" id="songTitle">加载中...</div>
+      <div class="time-info">
+        <span id="currentTime">00:00</span>
+        <span id="duration">00:00</span>
+      </div>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <div class="controls">
+      <button onclick="prevSong()">⏮️ 上一首</button>
+      <button onclick="togglePlay()" id="playBtn">▶️ 播放</button>
+      <button onclick="nextSong()">下一首 ⏭️</button>
+    </div>
+
+    <div class="controls">
+      <button onclick="toggleLoop()" id="loopBtn">🔁 单曲循环</button>
+    </div>
   </div>
 
-  <div class="controls">
-    <button onclick="prevSong()">上一首</button>
-    <button onclick="togglePlay()" id="playBtn">播放</button>
-    <button onclick="nextSong()">下一首</button>
-    <button onclick="toggleLoop()" id="loopBtn">单曲循环</button>
+  <!-- 歌曲列表 -->
+  <div class="playlist">
+    <div class="playlist-title">播放列表</div>
+    <div id="playlistContainer"></div>
   </div>
 </div>
 
 <audio id="audio"></audio>
 
 <script>
- 
   const songs = [
     {
       name: "Faded - Alan Walker",
@@ -105,7 +413,7 @@
     {
       name: "Sunburst - Tobu",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburst - Tobu.mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburst（云隙阳光） - Tobu:Itro.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburstï¼ˆäº'éš™é˜³å…‰ï¼‰ - Tobu:Itro.jpeg"
     },
     {
       name: "World of Walker: Rise of the drones - Alan Walker",
@@ -139,50 +447,82 @@
   const playBtn = document.getElementById("playBtn");
   const loopBtn = document.getElementById("loopBtn");
   const progressContainer = document.getElementById("progressContainer");
+  const bgBlur = document.getElementById("bgBlur");
+  const currentTimeEl = document.getElementById("currentTime");
+  const durationEl = document.getElementById("duration");
+  const playlistContainer = document.getElementById("playlistContainer");
 
+  // 格式化时间
+  function formatTime(time) {
+    if (!time || isNaN(time)) return "00:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  // 加载歌曲
   function loadSong(i) {
+    index = i;
     audio.src = songs[i].url;
     title.textContent = songs[i].name;
     cover.src = songs[i].cover;
+    bgBlur.style.backgroundImage = `url('${songs[i].cover}')`;
+    updatePlaylist();
   }
 
+  // 切换播放/暂停
   function togglePlay() {
     if (isPlaying) {
       audio.pause();
-      playBtn.textContent = "播放";
+      playBtn.textContent = "▶️ 播放";
+      bgBlur.classList.remove("active");
     } else {
       audio.play();
-      playBtn.textContent = "暂停";
+      playBtn.textContent = "⏸️ 暂停";
+      bgBlur.classList.add("active");
     }
     isPlaying = !isPlaying;
   }
 
+  // 下一首
   function nextSong() {
     index = (index + 1) % songs.length;
     loadSong(index);
     audio.play();
     isPlaying = true;
-    playBtn.textContent = "暂停";
+    playBtn.textContent = "⏸️ 暂停";
+    bgBlur.classList.add("active");
   }
 
+  // 上一首
   function prevSong() {
     index = (index - 1 + songs.length) % songs.length;
     loadSong(index);
     audio.play();
     isPlaying = true;
-    playBtn.textContent = "暂停";
+    playBtn.textContent = "⏸️ 暂停";
+    bgBlur.classList.add("active");
   }
 
+  // 切换循环模式
   function toggleLoop() {
     audio.loop = !audio.loop;
-    loopBtn.textContent = audio.loop ? "循环中" : "单曲循环";
+    loopBtn.textContent = audio.loop ? "🔄 循环中" : "🔁 单曲循环";
   }
 
+  // 更新进度条
   audio.addEventListener("timeupdate", () => {
     const percent = (audio.currentTime / audio.duration) * 100;
     progress.style.width = percent + "%";
+    currentTimeEl.textContent = formatTime(audio.currentTime);
   });
 
+  // 加载元数据
+  audio.addEventListener("loadedmetadata", () => {
+    durationEl.textContent = formatTime(audio.duration);
+  });
+
+  // 点击进度条跳转
   progressContainer.addEventListener("click", e => {
     const width = progressContainer.clientWidth;
     const clickX = e.offsetX;
@@ -190,11 +530,34 @@
     audio.currentTime = (clickX / width) * duration;
   });
 
+  // 歌曲结束自动下一首
   audio.addEventListener("ended", () => {
     if (!audio.loop) nextSong();
   });
 
+  // 渲染播放列表
+  function updatePlaylist() {
+    playlistContainer.innerHTML = songs.map((song, i) => `
+      <div class="song-item ${i === index ? 'active' : ''}" onclick="loadSongAndPlay(${i})">
+        <span class="song-number">${i + 1}</span>
+        <span class="song-name" title="${song.name}">${song.name}</span>
+        <span class="play-icon">♫</span>
+      </div>
+    `).join('');
+  }
+
+  // 选择歌曲并播放
+  function loadSongAndPlay(i) {
+    loadSong(i);
+    audio.play();
+    isPlaying = true;
+    playBtn.textContent = "⏸️ 暂停";
+    bgBlur.classList.add("active");
+  }
+
+  // 初始化
   loadSong(index);
+  updatePlaylist();
 </script>
 
 </body>
