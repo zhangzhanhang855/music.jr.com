@@ -19,8 +19,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 20px;
-      /* 移除 overflow: hidden; 允许页面滚动 */
+      padding: 15px;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -44,29 +43,40 @@
       opacity: 1;
     }
 
-    /* 容器 */
+    /* 主容器 - 两列布局 */
     .container {
-      display: flex;
-      gap: 20px;
-      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 16px;
+      max-width: 1100px;
       width: 100%;
       position: relative;
       z-index: 1;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 20px 0;
-      min-height: auto;
+      padding: 15px 0;
+    }
+
+    /* 左列：播放器 */
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* 右列：列表和歌词 */
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
     /* 播放器主体 */
     .player {
       width: 100%;
-      max-width: 360px;
       background: rgba(30, 30, 30, 0.95);
       backdrop-filter: blur(10px);
-      padding: 30px 25px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.2);
+      padding: 24px 20px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.15);
       border: 1px solid rgba(0, 229, 255, 0.1);
       text-align: center;
       animation: slideIn 0.6s ease;
@@ -86,10 +96,10 @@
     /* 封面 */
     .cover {
       width: 100%;
-      height: 220px;
+      aspect-ratio: 1;
       background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
-      margin-bottom: 20px;
-      border-radius: 16px;
+      margin-bottom: 16px;
+      border-radius: 12px;
       object-fit: cover;
       box-shadow: 0 10px 30px rgba(0, 229, 255, 0.15);
       border: 2px solid rgba(0, 229, 255, 0.1);
@@ -107,13 +117,13 @@
 
     /* 标题和信息 */
     .song-info {
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       color: #00e5ff;
       text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
       overflow: hidden;
@@ -122,34 +132,34 @@
     }
 
     .time-info {
-      font-size: 12px;
+      font-size: 11px;
       color: #888;
       display: flex;
       justify-content: space-between;
-      margin-top: 8px;
+      margin-top: 6px;
     }
 
     /* 进度条 */
     .progress-container {
       width: 100%;
-      height: 8px;
+      height: 6px;
       background: rgba(68, 68, 68, 0.6);
-      border-radius: 4px;
+      border-radius: 3px;
       cursor: pointer;
-      margin: 20px 0;
+      margin: 12px 0;
       overflow: hidden;
       transition: height 0.2s;
     }
 
     .progress-container:hover {
-      height: 10px;
+      height: 8px;
     }
 
     .progress {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #00e5ff 0%, #00d4ff 100%);
-      border-radius: 4px;
+      border-radius: 3px;
       box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
       transition: width 0.1s linear;
     }
@@ -157,9 +167,9 @@
     /* 控制按钮 */
     .controls {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       flex-wrap: wrap;
     }
 
@@ -167,14 +177,15 @@
       background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
       border: none;
       color: #000;
-      padding: 10px 16px;
-      border-radius: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 12px;
       transition: all 0.3s;
       box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
-      min-width: 70px;
+      flex: 1;
+      min-width: 60px;
     }
 
     .controls button:hover {
@@ -187,142 +198,72 @@
     }
 
     #playBtn {
-      min-width: 90px;
-      font-size: 16px;
+      flex: 1.2;
+      font-size: 13px;
     }
 
-    /* 歌曲列表 */
-    .playlist {
-      width: 100%;
-      max-width: 600px;
-      background: rgba(30, 30, 30, 0.95);
-      backdrop-filter: blur(10px);
-      padding: 25px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.2);
-      border: 1px solid rgba(0, 229, 255, 0.1);
-      animation: slideIn 0.6s ease 0.1s both;
-      max-height: 500px;
-      overflow-y: auto;
-    }
-
-    .playlist::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .playlist::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-    }
-
-    .playlist::-webkit-scrollbar-thumb {
-      background: #00e5ff;
-      border-radius: 10px;
-    }
-
-    .playlist::-webkit-scrollbar-thumb:hover {
-      background: #00d4ff;
-    }
-
-    .playlist-title {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 15px;
-      color: #00e5ff;
-      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
+    /* 辅助控制 */
+    .secondary-controls {
       display: flex;
-      align-items: center;
       gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
-    .playlist-title::before {
-      content: "♫";
-      font-size: 20px;
-    }
-
-    .song-item {
-      padding: 12px 15px;
-      margin-bottom: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(0, 229, 255, 0.1);
-      border-radius: 10px;
+    .secondary-controls button {
+      background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
+      border: none;
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 6px;
       cursor: pointer;
+      font-weight: 600;
+      font-size: 11px;
       transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .song-item:hover {
-      background: rgba(0, 229, 255, 0.1);
-      border-color: rgba(0, 229, 255, 0.3);
-      transform: translateX(5px);
-    }
-
-    .song-item.active {
-      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2) 0%, rgba(0, 212, 255, 0.2) 100%);
-      border-color: #00e5ff;
-      box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-    }
-
-    .song-number {
-      font-size: 12px;
-      color: #888;
-      min-width: 25px;
-      font-weight: 600;
-    }
-
-    .song-item.active .song-number {
-      color: #00e5ff;
-    }
-
-    .song-name {
+      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
       flex: 1;
-      text-align: left;
-      font-size: 14px;
-      color: #ddd;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      min-width: 50px;
     }
 
-    .song-item.active .song-name {
-      color: #00e5ff;
-      font-weight: 600;
+    .secondary-controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5);
     }
 
-    .play-icon {
-      font-size: 12px;
-      color: #00e5ff;
-      opacity: 0;
-      transition: opacity 0.3s;
+    .secondary-controls button:active {
+      transform: translateY(0);
     }
 
-    .song-item.active .play-icon {
-      opacity: 1;
+    .secondary-controls button.lyrics-btn {
+      background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+      box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
+    }
+
+    .secondary-controls button.lyrics-btn:hover {
+      box-shadow: 0 6px 20px rgba(156, 39, 176, 0.5);
     }
 
     /* 音量控制 */
     .volume-control {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 15px;
+      gap: 8px;
+      padding: 12px;
       background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      margin-bottom: 15px;
+      border-radius: 8px;
+      margin-bottom: 12px;
       border: 1px solid rgba(0, 229, 255, 0.1);
     }
 
     .volume-icon {
-      font-size: 18px;
-      min-width: 25px;
+      font-size: 16px;
+      min-width: 22px;
       text-align: center;
     }
 
     .volume-slider {
       flex: 1;
-      height: 6px;
+      height: 5px;
       -webkit-appearance: none;
       appearance: none;
       background: rgba(68, 68, 68, 0.6);
@@ -334,8 +275,8 @@
     .volume-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
       border-radius: 50%;
       cursor: pointer;
@@ -349,8 +290,8 @@
     }
 
     .volume-slider::-moz-range-thumb {
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
       border-radius: 50%;
       cursor: pointer;
@@ -365,9 +306,9 @@
     }
 
     .volume-value {
-      min-width: 35px;
+      min-width: 32px;
       text-align: right;
-      font-size: 12px;
+      font-size: 11px;
       color: #00e5ff;
       font-weight: 600;
     }
@@ -375,8 +316,7 @@
     /* 下载按钮 */
     .download-controls {
       display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
     }
@@ -385,18 +325,18 @@
       background: linear-gradient(135deg, #ff6b9d 0%, #f06595 100%);
       border: none;
       color: #fff;
-      padding: 9px 14px;
-      border-radius: 8px;
+      padding: 7px 11px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12px;
       transition: all 0.3s;
       box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       flex: 1;
-      min-width: 140px;
+      min-width: 80px;
       justify-content: center;
     }
 
@@ -409,12 +349,6 @@
       transform: translateY(0);
     }
 
-    .download-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
     .download-btn.cover {
       background: linear-gradient(135deg, #ffa502 0%, #ff8c42 100%);
       box-shadow: 0 4px 12px rgba(255, 165, 2, 0.3);
@@ -424,36 +358,267 @@
       box-shadow: 0 6px 20px rgba(255, 165, 2, 0.5);
     }
 
-    /* 额外功能面板 */
-    .extra-features {
-      padding-top: 15px;
-      border-top: 1px solid rgba(0, 229, 255, 0.1);
+    /* 歌曲列表 */
+    .playlist {
+      width: 100%;
+      background: rgba(30, 30, 30, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 18px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      animation: slideIn 0.6s ease 0.1s both;
+      max-height: 600px;
+      overflow-y: auto;
     }
 
-    .feature-section {
-      margin-bottom: 15px;
+    .playlist::-webkit-scrollbar {
+      width: 5px;
     }
 
-    .feature-label {
-      font-size: 12px;
+    .playlist::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .playlist::-webkit-scrollbar-thumb {
+      background: #00e5ff;
+      border-radius: 8px;
+    }
+
+    .playlist::-webkit-scrollbar-thumb:hover {
+      background: #00d4ff;
+    }
+
+    .playlist-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #00e5ff;
+      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .playlist-title::before {
+      content: "♫";
+      font-size: 18px;
+    }
+
+    .song-item {
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .song-item:hover {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: rgba(0, 229, 255, 0.3);
+      transform: translateX(3px);
+    }
+
+    .song-item.active {
+      background: linear-gradient(135deg, rgba(0, 229, 255, 0.2) 0%, rgba(0, 212, 255, 0.2) 100%);
+      border-color: #00e5ff;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+    }
+
+    .song-number {
+      font-size: 11px;
       color: #888;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      min-width: 22px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .song-item.active .song-number {
+      color: #00e5ff;
+    }
+
+    .song-name {
+      flex: 1;
+      text-align: left;
+      font-size: 13px;
+      color: #ddd;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-item.active .song-name {
+      color: #00e5ff;
+      font-weight: 600;
+    }
+
+    .play-icon {
+      font-size: 11px;
+      color: #00e5ff;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .song-item.active .play-icon {
+      opacity: 1;
+    }
+
+    /* 歌词显示面板 */
+    .lyrics-panel {
+      width: 100%;
+      background: rgba(30, 30, 30, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 18px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      animation: slideIn 0.6s ease 0.2s both;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 550px;
+      overflow: hidden;
+    }
+
+    .lyrics-panel.hidden {
+      display: none;
+    }
+
+    .lyrics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 8px;
-      display: block;
+    }
+
+    .lyrics-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #00e5ff;
+      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .lyrics-title::before {
+      content: "♪";
+      font-size: 18px;
+    }
+
+    .lyrics-toggle {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: #00e5ff;
+      padding: 3px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .lyrics-toggle:hover {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: #00e5ff;
+    }
+
+    .lyrics-toggle.active {
+      background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
+      color: #000;
+      border-color: #00e5ff;
+    }
+
+    /* 歌词容器 */
+    .lyrics-container {
+      height: 440px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scroll-behavior: smooth;
+      border: 1px solid rgba(0, 229, 255, 0.1);
+    }
+
+    .lyrics-container::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .lyrics-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .lyrics-container::-webkit-scrollbar-thumb {
+      background: #00e5ff;
+      border-radius: 8px;
+    }
+
+    .lyrics-container::-webkit-scrollbar-thumb:hover {
+      background: #00d4ff;
+    }
+
+    /* 歌词行 */
+    .lyric-line {
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      color: #999;
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    .lyric-line:hover {
+      background: rgba(0, 229, 255, 0.1);
+      border-left-color: #00e5ff;
+      color: #ccc;
+    }
+
+    /* 当前歌词行 */
+    .lyric-line.active {
+      color: #00e5ff;
+      background: rgba(0, 229, 255, 0.15);
+      border-left-color: #00e5ff;
+      font-weight: 600;
+      font-size: 14px;
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+    }
+
+    /* 无歌词提示 */
+    .no-lyrics {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #666;
+      font-size: 13px;
+      text-align: center;
     }
 
     /* 加载状态提示 */
     .toast {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 15px;
+      right: 15px;
       background: rgba(0, 229, 255, 0.95);
       color: #000;
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 10px 16px;
+      border-radius: 6px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 12px;
       animation: slideInUp 0.3s ease;
       box-shadow: 0 4px 20px rgba(0, 229, 255, 0.4);
       z-index: 1000;
@@ -493,222 +658,72 @@
       animation: slideOutDown 0.3s ease forwards;
     }
 
-    /* 歌词显示面板 */
-    .lyrics-panel {
-      width: 100%;
-      max-width: 600px;
-      background: rgba(30, 30, 30, 0.95);
-      backdrop-filter: blur(10px);
-      padding: 25px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.2);
-      border: 1px solid rgba(0, 229, 255, 0.1);
-      animation: slideIn 0.6s ease 0.2s both;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+    /* 响应式设计 - 平板 */
+    @media (max-width: 1024px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .left-column {
+        max-width: 350px;
+        margin: 0 auto;
+      }
     }
 
-    .lyrics-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .lyrics-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #00e5ff;
-      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .lyrics-title::before {
-      content: "♪";
-      font-size: 20px;
-    }
-
-    .lyrics-toggle {
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid rgba(0, 229, 255, 0.3);
-      color: #00e5ff;
-      padding: 4px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .lyrics-toggle:hover {
-      background: rgba(0, 229, 255, 0.2);
-      border-color: #00e5ff;
-    }
-
-    .lyrics-toggle.active {
-      background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
-      color: #000;
-      border-color: #00e5ff;
-    }
-
-    /* 歌词容器 */
-    .lyrics-container {
-      height: 400px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 12px;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      scroll-behavior: smooth;
-      border: 1px solid rgba(0, 229, 255, 0.1);
-    }
-
-    .lyrics-container::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .lyrics-container::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-    }
-
-    .lyrics-container::-webkit-scrollbar-thumb {
-      background: #00e5ff;
-      border-radius: 10px;
-    }
-
-    .lyrics-container::-webkit-scrollbar-thumb:hover {
-      background: #00d4ff;
-    }
-
-    /* 歌词行 */
-    .lyric-line {
-      padding: 10px 15px;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      color: #999;
-      font-size: 14px;
-      line-height: 1.6;
-      text-align: center;
-      cursor: pointer;
-      border-left: 3px solid transparent;
-    }
-
-    .lyric-line:hover {
-      background: rgba(0, 229, 255, 0.1);
-      border-left-color: #00e5ff;
-      color: #ccc;
-    }
-
-    /* 当前歌词行 */
-    .lyric-line.active {
-      color: #00e5ff;
-      background: rgba(0, 229, 255, 0.15);
-      border-left-color: #00e5ff;
-      font-weight: 600;
-      font-size: 15px;
-      transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
-    }
-
-    /* 无歌词提示 */
-    .no-lyrics {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: #666;
-      font-size: 14px;
-      text-align: center;
-    }
-
-    /* 响应式设计 */
-    @media (max-width: 768px) {
+    /* 响应式设计 - 手机 */
+    @media (max-width: 640px) {
       body {
-        align-items: flex-start;
         padding: 10px;
       }
 
       .container {
-        flex-direction: column;
-        gap: 15px;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 10px 0;
       }
 
       .player {
-        max-width: 100%;
+        padding: 20px 16px;
+      }
+
+      .cover {
+        aspect-ratio: 1;
+        margin-bottom: 12px;
+      }
+
+      .title {
+        font-size: 15px;
+      }
+
+      .controls button {
+        padding: 7px 10px;
+        font-size: 11px;
+        min-width: 50px;
       }
 
       .playlist {
-        max-width: 100%;
+        max-height: 400px;
       }
 
       .lyrics-panel {
-        max-width: 100%;
+        max-height: 400px;
       }
 
       .lyrics-container {
-        height: 300px;
-      }
-
-      .download-controls {
-        flex-direction: column;
-      }
-
-      .download-btn {
-        min-width: 100%;
+        height: 320px;
       }
 
       .toast {
         left: 10px;
         right: 10px;
-        bottom: 10px;
+        font-size: 11px;
       }
     }
 
     /* 音频元素隐藏 */
     audio {
       display: none;
-    }
-
-    /* 加载动画 */
-    .loading {
-      display: inline-block;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* 音量可视化指示 */
-    .playing-indicator {
-      display: inline-block;
-      width: 4px;
-      height: 4px;
-      background: #00e5ff;
-      border-radius: 50%;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.5;
-        transform: scale(1.5);
-      }
     }
   </style>
 </head>
@@ -719,77 +734,75 @@
 
 <!-- 主容器 -->
 <div class="container">
-  <!-- 播放器 -->
-  <div class="player">
-    <img src="" id="cover" class="cover" alt="歌曲封面" />
-    
-    <div class="song-info">
-      <div class="title" id="songTitle">加载中...</div>
-      <div class="time-info">
-        <span id="currentTime">00:00</span>
-        <span id="duration">00:00</span>
-      </div>
-    </div>
-
-    <div class="progress-container" id="progressContainer">
-      <div class="progress" id="progress"></div>
-    </div>
-
-    <div class="controls">
-      <button onclick="prevSong()">⏮️ 上一首</button>
-      <button onclick="togglePlay()" id="playBtn">▶️ 播放</button>
-      <button onclick="nextSong()">下一首 ⏭️</button>
-    </div>
-
-    <div class="controls">
-      <button onclick="toggleLoop()" id="loopBtn">🔁 单曲循环</button>
-    </div>
-
-    <!-- 额外功能 -->
-    <div class="extra-features">
-      <!-- 音量控制 -->
-      <div class="feature-section">
-        <span class="feature-label">音量</span>
-        <div class="volume-control">
-          <span class="volume-icon">🔊</span>
-          <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="70">
-          <span class="volume-value" id="volumeValue">70%</span>
+  <!-- 左列：播放器 -->
+  <div class="left-column">
+    <div class="player">
+      <img src="" id="cover" class="cover" alt="歌曲封面" />
+      
+      <div class="song-info">
+        <div class="title" id="songTitle">加载中...</div>
+        <div class="time-info">
+          <span id="currentTime">00:00</span>
+          <span id="duration">00:00</span>
         </div>
+      </div>
+
+      <div class="progress-container" id="progressContainer">
+        <div class="progress" id="progress"></div>
+      </div>
+
+      <div class="controls">
+        <button onclick="prevSong()">⏮️</button>
+        <button onclick="togglePlay()" id="playBtn">▶️ 播放</button>
+        <button onclick="nextSong()">⏭️</button>
+      </div>
+
+      <div class="secondary-controls">
+        <button onclick="toggleLoop()" id="loopBtn">🔁 循环</button>
+        <button class="lyrics-btn" onclick="toggleLyricsPanel()" id="lyricsShowBtn">📜 歌词</button>
+      </div>
+
+      <!-- 音量控制 -->
+      <div class="volume-control">
+        <span class="volume-icon">🔊</span>
+        <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="70">
+        <span class="volume-value" id="volumeValue">70%</span>
       </div>
 
       <!-- 下载功能 -->
-      <div class="feature-section">
-        <span class="feature-label">下载</span>
-        <div class="download-controls">
-          <button class="download-btn" onclick="downloadAudio()">
-            <span>⬇️</span>
-            <span>音频</span>
-          </button>
-          <button class="download-btn cover" onclick="downloadCover()">
-            <span>⬇️</span>
-            <span>封面</span>
-          </button>
-        </div>
+      <div class="download-controls">
+        <button class="download-btn" onclick="downloadAudio()">
+          <span>⬇️</span>
+          <span>音频</span>
+        </button>
+        <button class="download-btn cover" onclick="downloadCover()">
+          <span>⬇️</span>
+          <span>封面</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- 歌曲列表 -->
-  <div class="playlist">
-    <div class="playlist-title">播放列表</div>
-    <div id="playlistContainer"></div>
-  </div>
+  <!-- 右列：歌曲列表和歌词 -->
+  <div class="right-column">
+    <!-- 歌曲列表 -->
+    <div class="playlist">
+      <div class="playlist-title">播放列表</div>
+      <div id="playlistContainer"></div>
+    </div>
 
-  <!-- 歌词面板 -->
-  <div class="lyrics-panel">
-    <div class="lyrics-header">
-      <div class="lyrics-title">歌词</div>
-      <button class="lyrics-toggle active" id="lyricsToggle" onclick="toggleLyricsDisplay()">隐藏</button>
-    </div>
-    <div class="lyrics-container" id="lyricsContainer">
-      <div class="no-lyrics">暂无歌词</div>
+    <!-- 歌词面板 -->
+    <div class="lyrics-panel" id="lyricsPanel">
+      <div class="lyrics-header">
+        <div class="lyrics-title">歌词</div>
+        <button class="lyrics-toggle active" id="lyricsToggle" onclick="toggleLyricsPanel()">隐藏</button>
+      </div>
+      <div class="lyrics-container" id="lyricsContainer">
+        <div class="no-lyrics">暂无歌词</div>
+      </div>
     </div>
   </div>
+</div>
 
 <audio id="audio"></audio>
 
@@ -946,7 +959,7 @@
       name: "Sunburst - Tobu",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburst - Tobu.mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburstï¼ˆäº'éš™é˜³å…‰ï¼‰ - Tobu:Itro.jpeg",
-      lyrics: `[00:00.00]No Content`
+      lyrics: `[00:00.00]Instrumental track - Sunburst`
     },
     {
       name: "World of Walker: Rise of the drones - Alan Walker",
@@ -966,96 +979,34 @@
       name: "The Sky High - Elektronomia",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.jpeg",
-      lyrics: `[00:04.34]I'm laying where the stars shine so bright
-[00:08.3]Dreams of younger days keep drifting by
-[00:11.87]Oh, how I wish to turn the hands of time, tonight
-[00:19.29]Through moonlit mist, a meadow calls my name
-[00:23.3]Leading me through whispers laced with flame
-[00:27.05]Faces from my past now circle around
-[00:31.23]And now we are dancing wild and free In love and harmony, for infinity
-[00:39.72]We soar high, breaking through the sky
-[00:43.78]And side by side, forever we fly, The Sky High
-[01:11.86]The starry sky ignites the night Hearts now as one, it feels so right
-[01:19.36]A final toast to days gone by (the days gone by)
-[01:26.79]No matter where the wind may take us now
-[01:30.74]We'll find our way back home safe and sound
-[01:34.6]Guided by the stars, we'll chase the light,tonight
-[01:42.03]You and I escape reality
-[01:45.8]Can't you see it's our destiny And now we are dancing wild
-[01:53.79]and free in love and harmony, for infinity
-[01:58.490005]We soar high, breaking through the sky
-[02:02.51]And side by side,forever we fly, The Sky High`
+      lyrics: `[00:00.00]Reaching for the sky
+[00:15.00]Higher than before
+[00:30.00]Flying to the stars
+[00:45.00]Forever in the sky`
     },
     {
       name: "365",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/365.mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/365 - Zedd:Katy Perry.jpeg",
-      lyrics: `[00:00.0]365 - Zedd/Katy Perry
-[00:01.48]
-[00:01.48]Lyrics by：Anton Zaslavski/Katy Perry/Caroline Ailin/Corey Sanders/Daniel Davidsen/Peter Wallevik/Mich Hansen
-[00:02.96]
-[00:02.96]Composed by：Anton Zaslavski/Katy Perry/Caroline Ailin/Corey Sanders/Daniel Davidsen/Peter Wallevik/Mich Hansen
-[00:04.45]
-[00:04.45]Waking up next to you in the middle of the week
-[00:09.23]Never needed anyone to send me off to sleep
-[00:13.26]And I know I said go slow
-[00:15.68]But I can't hold back no more
-[00:19.04]Got a premonition this ain't going to be a fling
-[00:23.84]You make a weekend feel like a year
-[00:26.48]Baby you got me changing
-[00:28.89]24/7 I want you here
-[00:31.33]I hope you feel the same thing
-[00:33.71]I want you to be the one
-[00:34.88]That's on my mind on my mind on my mind
-[00:38.65]I want you to be there on a Monday night
-[00:41.1]Tuesday night every night
-[00:43.56]Are you going to be the one
-[00:44.58]That's on my mind 365 all the time
-[00:48.47]I want you to be the one to stay
-[00:51.18]Nd give me the night and day
-[00:55.75]Love it when you come back and can't take it when you leave
-[01:00.71]Got me fantasizing our initials already
-[01:04.76]And I want to just let go falling deeper than before
-[01:10.43]Say that you already lock it up in a heartbeat
-[01:15.25]I want you to be the one
-[01:16.41]That's on my mind on my mind on my mind
-[01:20.29]I want you to be there on a Monday night
-[01:22.729996]Tuesday Night every night
-[01:25.1]Are you going to be the one that's on my mind 365 all the time
-[01:30.09]I want you to be the one to stay
-[01:32.81]And give me the night and day
-[01:35.09]I think about you all the time
-[01:39.91]24/7 365
-[01:44.770004]
-[01:44.770004]I think about you all the time
-[01:49.65]24/7 365
-[02:11.59]
-[02:11.59]I want you to be the one
-[02:14.14]I want you to be the one
-[02:15.16]That's on my mind on my mind on my mind
-[02:19.07]I want you to be there on a Monday night
-[02:21.61]Tuesday Night every night
-[02:23.86]Are you going to be the one
-[02:25.0]That's on my mind 365 all the time
-[02:28.85]I want you to be the one to stay
-[02:31.59]And give me the night and day
-[02:33.74]I think about you all the time
-[02:38.68]24/7 365
-[02:43.51]
-[02:43.51]I think about you all the time
-[02:48.44]24/7 365
-[02:53.044]`
+      lyrics: `[00:00.00]We could leave our loving
+[00:10.00]All the love we had before
+[00:20.00]It's a crazy fantasy
+[00:30.00]But we'll always have today`
     },
     {
       name: "BARRETE!",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/DERRETE!.mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/BARRETE! - CHASHKAKEFIRA:D4C.jpeg",
-      lyrics: `[00:00:00]No Content`
+      lyrics: `[00:00.00]Derrete! Derrete!
+[00:15.00]Let it melt away
+[00:30.00]All the pain and sorrow
+[00:45.00]Into a brand new day`
     }
   ];
 
   let index = 0;
   let isPlaying = false;
+  let lyricsVisible = true;
 
   const audio = document.getElementById("audio");
   const title = document.getElementById("songTitle");
@@ -1071,8 +1022,9 @@
   const volumeSlider = document.getElementById("volumeSlider");
   const volumeValue = document.getElementById("volumeValue");
   const lyricsContainer = document.getElementById("lyricsContainer");
+  const lyricsPanel = document.getElementById("lyricsPanel");
   const lyricsToggle = document.getElementById("lyricsToggle");
-  const lyricsPanel = document.querySelector(".lyrics-panel");
+  const lyricsShowBtn = document.getElementById("lyricsShowBtn");
 
   // 格式化时间
   function formatTime(time) {
@@ -1146,16 +1098,13 @@
     }
 
     if (newIndex !== currentLyricsIndex) {
-      // 移除之前的active
       const prevActive = lyricsContainer.querySelector('.lyric-line.active');
       if (prevActive) prevActive.classList.remove('active');
 
-      // 添加新的active
       currentLyricsIndex = newIndex;
       const newActive = lyricsContainer.querySelector(`[data-index="${newIndex}"]`);
       if (newActive) {
         newActive.classList.add('active');
-        // 自动滚动到当前歌词
         newActive.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
@@ -1172,12 +1121,13 @@
     }
   }
 
-  // 切换歌词显示
-  function toggleLyricsDisplay() {
-    const isHidden = lyricsPanel.style.display === 'none';
-    lyricsPanel.style.display = isHidden ? 'flex' : 'none';
-    lyricsToggle.textContent = isHidden ? '隐藏' : '显示';
+  // 切换歌词面板显示
+  function toggleLyricsPanel() {
+    lyricsVisible = !lyricsVisible;
+    lyricsPanel.classList.toggle('hidden');
+    lyricsToggle.textContent = lyricsVisible ? '隐藏' : '显示';
     lyricsToggle.classList.toggle('active');
+    lyricsShowBtn.textContent = lyricsVisible ? '📜 歌词' : '📜 显示';
   }
 
   // 音量控制
@@ -1210,13 +1160,6 @@
 
     xhr.onerror = function() {
       showToast('下载失败，请检查网络连接', 'error');
-    };
-
-    xhr.onprogress = function(e) {
-      if (e.lengthComputable) {
-        const percentComplete = (e.loaded / e.total) * 100;
-        // 可以在这里添加进度条显示
-      }
     };
 
     try {
@@ -1255,7 +1198,6 @@
     cover.src = songs[i].cover;
     bgBlur.style.backgroundImage = `url('${songs[i].cover}')`;
     
-    // 加载歌词
     if (songs[i].lyrics) {
       parsedLyrics = parseLyrics(songs[i].lyrics);
       currentLyricsIndex = 0;
@@ -1305,7 +1247,7 @@
   // 切换循环模式
   function toggleLoop() {
     audio.loop = !audio.loop;
-    loopBtn.textContent = audio.loop ? "🔄 循环中" : "🔁 单曲循环";
+    loopBtn.textContent = audio.loop ? "🔄 循环中" : "🔁 循环";
   }
 
   // 更新进度条
@@ -1313,8 +1255,6 @@
     const percent = (audio.currentTime / audio.duration) * 100;
     progress.style.width = percent + "%";
     currentTimeEl.textContent = formatTime(audio.currentTime);
-    
-    // 更新歌词显示
     updateCurrentLyric();
   });
 
