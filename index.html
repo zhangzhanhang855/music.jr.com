@@ -77,11 +77,120 @@
       gap: calc(var(--base-spacing) - 2px);
     }
 
-    /* 右列：MV播放器 */
+    /* 右列：MV播放器和音频可视化 */
     .right-column {
       display: flex;
       flex-direction: column;
       gap: calc(var(--base-spacing) - 2px);
+    }
+
+    /* 音频可视化面板 */
+    .visualizer-panel {
+      width: 100%;
+      background: rgba(30, 30, 30, 0.95);
+      backdrop-filter: blur(10px);
+      padding: calc(var(--base-spacing) * 1.1);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.15);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      animation: slideIn 0.6s ease;
+      display: flex;
+      flex-direction: column;
+      gap: var(--base-spacing);
+      overflow: hidden;
+    }
+
+    .visualizer-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #00e5ff;
+      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: calc(var(--base-spacing) / 2.618);
+    }
+
+    .visualizer-title::before {
+      content: "📊";
+      font-size: 18px;
+    }
+
+    .visualizer-controls {
+      display: flex;
+      gap: calc(var(--base-spacing) / 2);
+      flex-wrap: wrap;
+    }
+
+    .visualizer-controls button {
+      background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
+      border: none;
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 11px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
+      flex: 1;
+      min-width: 70px;
+    }
+
+    .visualizer-controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5);
+    }
+
+    .visualizer-controls button.active {
+      background: linear-gradient(135deg, #ff1493 0%, #c71585 100%);
+      box-shadow: 0 6px 20px rgba(255, 20, 147, 0.6);
+    }
+
+    /* Canvas 容器 */
+    .canvas-container {
+      width: 100%;
+      height: 200px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 229, 255, 0.2);
+    }
+
+    .canvas-container canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 音频统计信息 */
+    .audio-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: calc(var(--base-spacing) / 2);
+      padding: var(--base-spacing);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 229, 255, 0.1);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #888;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      color: #00e5ff;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
     }
 
     /* MV容器 */
@@ -804,6 +913,10 @@
         display: flex;
       }
 
+      .visualizer-panel {
+        order: -1;
+      }
+
       .mv-panel {
         max-height: 700px;
       }
@@ -840,6 +953,7 @@
 
       .right-column {
         display: flex;
+        flex-direction: column;
         grid-column: 3;
       }
 
@@ -857,6 +971,20 @@
 
       .lyrics-container {
         height: 320px;
+      }
+
+      .visualizer-panel {
+        order: -1;
+        max-height: 300px;
+      }
+
+      .canvas-container {
+        height: 140px;
+      }
+
+      .audio-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
       }
 
       .mv-panel {
@@ -905,7 +1033,13 @@
       }
 
       .right-column {
-        display: none;
+        display: flex;
+        flex-direction: column;
+        gap: var(--base-spacing);
+      }
+
+      .visualizer-panel {
+        order: -1;
       }
 
       .mv-panel {
@@ -922,6 +1056,10 @@
 
       .lyrics-container {
         height: 280px;
+      }
+
+      .canvas-container {
+        height: 160px;
       }
 
       .youtube-container {
@@ -946,7 +1084,13 @@
       }
 
       .right-column {
-        display: none;
+        display: flex;
+        flex-direction: column;
+        gap: var(--base-spacing);
+      }
+
+      .visualizer-panel {
+        order: -1;
       }
 
       .mv-panel {
@@ -965,68 +1109,25 @@
         height: 280px;
       }
 
+      .canvas-container {
+        height: 140px;
+      }
+
       .youtube-container {
         padding-bottom: 56.25%;
       }
-    }
 
-    /* 手机 */
-    @media (max-width: 640px) {
-      body {
-        padding: var(--base-spacing);
+      .audio-stats {
+        grid-template-columns: 1fr 1fr;
       }
 
-      .container {
-        grid-template-columns: 1fr;
-        gap: var(--base-spacing);
-        padding: calc(var(--base-spacing) / 2) 0;
+      .visualizer-controls {
+        flex-wrap: wrap;
       }
 
-      .player {
-        padding: calc(var(--base-spacing) * 1.25) var(--base-spacing);
-      }
-
-      .cover {
-        aspect-ratio: 1;
-        margin-bottom: var(--base-spacing);
-      }
-
-      .title {
-        font-size: 15px;
-      }
-
-      .controls button {
-        padding: 7px 10px;
-        font-size: 11px;
-        min-width: 50px;
-      }
-
-      .secondary-controls button {
-        font-size: 10px;
-        padding: 5px 8px;
-        min-width: 45px;
-      }
-
-      .playlist {
-        max-height: 400px;
-      }
-
-      .lyrics-panel {
-        max-height: 400px;
-      }
-
-      .lyrics-container {
-        height: 320px;
-      }
-
-      .mv-panel {
-        max-height: 450px;
-      }
-
-      .toast {
-        left: 10px;
-        right: 10px;
-        font-size: 11px;
+      .visualizer-controls button {
+        flex: 1;
+        min-width: 60px;
       }
     }
 
@@ -1114,8 +1215,43 @@
     </div>
   </div>
 
-  <!-- 右列：MV播放器 -->
+  <!-- 右列：可视化和MV播放器 -->
   <div class="right-column">
+    <!-- 音频可视化面板 -->
+    <div class="visualizer-panel" id="visualizerPanel">
+      <div class="visualizer-title">音频分析</div>
+      
+      <div class="visualizer-controls">
+        <button onclick="switchVisualizer('frequency')" class="active" id="freqBtn">频谱</button>
+        <button onclick="switchVisualizer('waveform')" id="waveBtn">波形</button>
+        <button onclick="toggleVisualizer()" id="vizToggleBtn">关闭</button>
+      </div>
+
+      <div class="canvas-container">
+        <canvas id="visualizerCanvas"></canvas>
+      </div>
+
+      <div class="audio-stats">
+        <div class="stat-item">
+          <div class="stat-label">频率 (Hz)</div>
+          <div class="stat-value" id="freqValue">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">幅度 (dB)</div>
+          <div class="stat-value" id="ampValue">-∞</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">平均音量</div>
+          <div class="stat-value" id="volValue">0%</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">峰值</div>
+          <div class="stat-value" id="peakValue">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MV播放器 -->
     <div class="mv-panel" id="mvPanel">
       <div class="mv-title">音乐视频 (MV)</div>
       <div class="youtube-container" id="youtubeContainer">
@@ -1208,84 +1344,7 @@
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Heading Home - Alan Walker [Normal Quality].mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Heading Home - Alan Walker:Ruben.jpeg",
       youtubeId: "iVX_uBvb8nQ",
-      lyrics: `[00:00.0]Heading Home - Alan Walker/Ruben
-[00:03.05]
-[00:03.05]Lyrics by：Jesper Borgen/Magnus Bertelsen/Gunnar Greve/Øyvind Sauvik
-[00:06.11]
-[00:06.11]Composed by：Alan Walker/Jesper Borgen/Magnus Bertelsen/Marcus Arnbekk/Anders Frøen/Carl Hovind/Gunnar Greve/Øyvind Sauvik/Fredrik Borch Olsen/Jesper Jenset
-[00:09.17]
-[00:09.17]I was so insatiable
-[00:13.65]'Til the lights came on and the stories got old
-[00:18.16]Now there's no one here I know
-[00:22.64]And the city outside it's not the same anymore
-[00:26.83]And I I remember when we were young
-[00:31.27]We'd write our names in the sand
-[00:35.26]So carelessly
-[00:36.62]Then the rain came and yours was gone
-[00:39.91]And now mine it stays alone
-[00:45.12]Nobody sees me now I'm a one man show
-[00:51.25]I'll do this on my own
-[00:54.03]We knew it all then now this is all I know
-[01:00.16]Guess I'm heading home now
-[01:02.74]Ooh ooh ooh ooh
-[01:04.51]
-[01:04.51]Yeah
-[01:05.41]
-[01:05.41]Ooh ooh ooh ooh
-[01:07.59]
-[01:07.59]Ooh ooh ooh ooh
-[01:09.06]
-[01:09.06]Guess I'm heading home now
-[01:11.85]Ooh ooh ooh ooh
-[01:14.24]
-[01:14.24]Ooh ooh ooh ooh
-[01:17.9]
-[01:17.9]Guess I'm heading home now
-[01:20.32]When the music always played
-[01:24.81]With the sound of our lives and the sweetest escape
-[01:29.3]And the neighbors would complain
-[01:33.72]We would turn it up louder who cares anyway
-[01:37.880005]'Cause we we remember that we were young
-[01:42.259995]Our lives were grains in the sand
-[01:46.759995]And we made up castles and kingdoms of
-[01:51.04]Now the rains have torn them down
-[01:56.270004]Nobody sees me now I'm a one man show
-[02:01.31]Ooh ooh ooh ooh
-[02:02.62]
-[02:02.62]Yeah
-[02:03.18]
-[02:03.18]Ooh ooh ooh ooh
-[02:05.35]
-[02:05.35]Ooh ooh ooh ooh
-[02:06.79]
-[02:06.79]Guess I'm heading home now
-[02:09.28]Ooh ooh ooh ooh
-[02:12.03]
-[02:12.03]Ooh ooh ooh ooh
-[02:14.23]
-[02:14.23]Ooh ooh ooh ooh
-[02:15.6]
-[02:15.6]Guess I'm heading home now
-[02:18.48]You'll find me
-[02:22.93]I'll be here oh
-[02:27.18]I can't see
-[02:31.75]I can't breathe anymore
-[02:35.86]But how could we have stayed
-[02:40.16]You were high on love I was drunk
-[02:43.79001]Drunk on the pain ooh
-[02:46.56]Ooh ooh ooh ooh
-[02:49.14]
-[02:49.14]Yes I'm heading I'm heading I'm heading
-[02:51.20999]Ooh ooh ooh ooh
-[02:53.04001]
-[02:53.04001]I'm heading home now hmm
-[02:55.54001]Ooh ooh ooh ooh
-[02:56.24]
-[02:56.24]Ooh ooh ooh ooh
-[02:58.38]
-[02:58.38]Ooh ooh ooh ooh
-[03:00.19]
-[03:00.19]Guess I'm heading home now`
+      lyrics: `[00:00.0]Heading Home - Alan Walker/Ruben`
     },
     {
       name: "Sunburst - Tobu",
@@ -1299,101 +1358,21 @@
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Rise of the drones.mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/World of Walker: Rise of the Drones - Alan Walker.jpeg",
       youtubeId: "D1cqIZPrvXo",
-      lyrics: `[00:00.0]World of Walker: Rise of the Drones - Alan Walker (艾兰·沃克)
-[01:02.97]Lyrics by：Gunnar Greve/Fredrik Borch Olsen/Mats Lie Skåre/Marcus Arnbekk/Phoebe Ryan
-[02:05.95]
-[02:05.95]Composed by：Alan Walker/Gunnar Greve/Fredrik Borch Olsen/Mats Lie Skåre/Marcus Arnbekk/Phoebe Ryan/James Njie
-[03:08.93]
-[03:08.93]I had a nightmare I can't sleep alone
-[03:12.8]I'm scared to wake up in a world I don't know
-[03:18.25]I try to run though I just can't escape
-[03:23.22]But if you're here then you can scare these nightmares away`
+      lyrics: `[00:00.0]World of Walker: Rise of the Drones`
     },
     {
       name: "The Sky High - Elektronomia",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.jpeg",
       youtubeId: "dAVOy1zj5iU",
-      lyrics: `[00:04.34]I'm laying where the stars shine so bright
-[00:08.3]Dreams of younger days keep drifting by
-[00:11.87]Oh, how I wish to turn the hands of time, tonight
-[00:19.29]Through moonlit mist, a meadow calls my name
-[00:23.3]Leading me through whispers laced with flame
-[00:27.05]Faces from my past now circle around
-[00:31.23]And now we are dancing wild and free In love and harmony, for infinity
-[00:39.72]We soar high, breaking through the sky
-[00:43.78]And side by side, forever we fly, The Sky High
-[01:11.86]The starry sky ignites the night Hearts now as one, it feels so right
-[01:19.36]A final toast to days gone by (the days gone by)
-[01:26.79]No matter where the wind may take us now
-[01:30.74]We'll find our way back home safe and sound
-[01:34.6]Guided by the stars, we'll chase the light,tonight
-[01:42.03]You and I escape reality
-[01:45.8]Can't you see it's our destiny And now we are dancing wild
-[01:53.79]and free in love and harmony, for infinity
-[01:58.490005]We soar high, breaking through the sky
-[02:02.51]And side by side,forever we fly, The Sky High`
+      lyrics: `[00:04.34]I'm laying where the stars shine so bright`
     },
     {
       name: "365",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/365.mp3",
       cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/365 - Zedd:Katy Perry.jpeg",
       youtubeId: "VJHp-Dw0BzY",
-      lyrics: `[00:00.0]365 - Zedd/Katy Perry
-[00:01.48]
-[00:01.48]Lyrics by：Anton Zaslavski/Katy Perry/Caroline Ailin/Corey Sanders/Daniel Davidsen/Peter Wallevik/Mich Hansen
-[00:02.96]
-[00:02.96]Composed by：Anton Zaslavski/Katy Perry/Caroline Ailin/Corey Sanders/Daniel Davidsen/Peter Wallevik/Mich Hansen
-[00:04.45]
-[00:04.45]Waking up next to you in the middle of the week
-[00:09.23]Never needed anyone to send me off to sleep
-[00:13.26]And I know I said go slow
-[00:15.68]But I can't hold back no more
-[00:19.04]Got a premonition this ain't going to be a fling
-[00:23.84]You make a weekend feel like a year
-[00:26.48]Baby you got me changing
-[00:28.89]24/7 I want you here
-[00:31.33]I hope you feel the same thing
-[00:33.71]I want you to be the one
-[00:34.88]That's on my mind on my mind on my mind
-[00:38.65]I want you to be there on a Monday night
-[00:41.1]Tuesday night every night
-[00:43.56]Are you going to be the one
-[00:44.58]That's on my mind 365 all the time
-[00:48.47]I want you to be the one to stay
-[00:51.18]Nd give me the night and day
-[00:55.75]Love it when you come back and can't take it when you leave
-[01:00.71]Got me fantasizing our initials already
-[01:04.76]And I want to just let go falling deeper than before
-[01:10.43]Say that you already lock it up in a heartbeat
-[01:15.25]I want you to be the one
-[01:16.41]That's on my mind on my mind on my mind
-[01:20.29]I want you to be there on a Monday night
-[01:22.729996]Tuesday Night every night
-[01:25.1]Are you going to be the one that's on my mind 365 all the time
-[01:30.09]I want you to be the one to stay
-[01:32.81]And give me the night and day
-[01:35.09]I think about you all the time
-[01:39.91]24/7 365
-[01:44.770004]
-[01:44.770004]I think about you all the time
-[01:49.65]24/7 365
-[02:11.59]
-[02:11.59]I want you to be the one
-[02:14.14]I want you to be the one
-[02:15.16]That's on my mind on my mind on my mind
-[02:19.07]I want you to be there on a Monday night
-[02:21.61]Tuesday Night every night
-[02:23.86]Are you going to be the one
-[02:25.0]That's on my mind 365 all the time
-[02:28.85]I want you to be the one to stay
-[02:31.59]And give me the night and day
-[02:33.74]I think about you all the time
-[02:38.68]24/7 365
-[02:43.51]
-[02:43.51]I think about you all the time
-[02:48.44]24/7 365
-[02:53.044]`
+      lyrics: `[00:00.0]365 - Zedd/Katy Perry`
     },
     {
       name: "BARRETE!",
@@ -1402,7 +1381,6 @@
       youtubeId: "",
       lyrics: `[00:00.00]Empty`
     },
-    
     {
       name: "好玩吗孩子",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/ScreenRecording_02-11-2026 13-57-19_1.m4a",
@@ -1412,6 +1390,206 @@
     }
   ];
 
+  // =============== 音频可视化部分 ===============
+  let audioContext = null;
+  let analyser = null;
+  let dataArray = null;
+  let frequencyData = null;
+  let canvas = null;
+  let canvasCtx = null;
+  let animationId = null;
+  let visualizerMode = 'frequency'; // 'frequency' 或 'waveform'
+  let visualizerEnabled = true;
+
+  function initAudioVisualizer() {
+    if (audioContext) return;
+
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContext = new AudioContext();
+      
+      const source = audioContext.createMediaElementAudioSource(audio);
+      analyser = audioContext.createAnalyser();
+      
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+      analyser.connect(audioContext.destination);
+      
+      frequencyData = new Uint8Array(analyser.frequencyBinCount);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      
+      canvas = document.getElementById('visualizerCanvas');
+      canvasCtx = canvas.getContext('2d');
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      startVisualization();
+    } catch (e) {
+      console.error('Audio visualizer initialization failed:', e);
+    }
+  }
+
+  function resizeCanvas() {
+    if (!canvas) return;
+    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+    canvasCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+
+  function startVisualization() {
+    if (!visualizerEnabled || !analyser) return;
+
+    const draw = () => {
+      animationId = requestAnimationFrame(draw);
+      
+      if (visualizerMode === 'frequency') {
+        drawFrequencyBars();
+      } else {
+        drawWaveform();
+      }
+      
+      updateAudioStats();
+    };
+
+    draw();
+  }
+
+  function drawFrequencyBars() {
+    analyser.getByteFrequencyData(frequencyData);
+    
+    const width = canvas.offsetWidth;
+    const height = canvas.offsetHeight;
+    
+    // 清除背景
+    canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+    canvasCtx.fillRect(0, 0, width, height);
+    
+    const barCount = 64;
+    const barWidth = width / barCount;
+    const step = Math.floor(frequencyData.length / barCount);
+    
+    for (let i = 0; i < barCount; i++) {
+      const value = frequencyData[i * step] || 0;
+      const barHeight = (value / 255) * height;
+      
+      // 渐变颜色：青色 -> 紫色 -> 粉色
+      const hue = (i / barCount) * 120 + 180; // 从青色到粉色
+      canvasCtx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+      
+      canvasCtx.fillRect(
+        i * barWidth,
+        height - barHeight,
+        barWidth * 0.8,
+        barHeight
+      );
+    }
+  }
+
+  function drawWaveform() {
+    analyser.getByteFrequencyData(frequencyData);
+    
+    const width = canvas.offsetWidth;
+    const height = canvas.offsetHeight;
+    const centerY = height / 2;
+    
+    // 清除背景
+    canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+    canvasCtx.fillRect(0, 0, width, height);
+    
+    // 绘制波形线
+    canvasCtx.strokeStyle = '#00e5ff';
+    canvasCtx.lineWidth = 2;
+    canvasCtx.shadowColor = 'rgba(0, 229, 255, 0.6)';
+    canvasCtx.shadowBlur = 10;
+    canvasCtx.beginPath();
+    
+    const sliceWidth = width / frequencyData.length;
+    let x = 0;
+    
+    for (let i = 0; i < frequencyData.length; i++) {
+      const v = frequencyData[i] / 128.0;
+      const y = (v * height) / 2;
+      
+      if (i === 0) {
+        canvasCtx.moveTo(x, centerY - y);
+      } else {
+        canvasCtx.lineTo(x, centerY - y);
+      }
+      
+      x += sliceWidth;
+    }
+    
+    canvasCtx.lineTo(width, centerY);
+    canvasCtx.stroke();
+    canvasCtx.shadowColor = 'transparent';
+  }
+
+  function updateAudioStats() {
+    if (!analyser) return;
+
+    analyser.getByteFrequencyData(frequencyData);
+    
+    // 计算平均音量
+    let sum = 0;
+    for (let i = 0; i < frequencyData.length; i++) {
+      sum += frequencyData[i];
+    }
+    const average = Math.round(sum / frequencyData.length);
+    const volumePercent = Math.round((average / 255) * 100);
+    
+    // 找最高频率
+    let maxValue = 0;
+    let maxIndex = 0;
+    for (let i = 0; i < frequencyData.length; i++) {
+      if (frequencyData[i] > maxValue) {
+        maxValue = frequencyData[i];
+        maxIndex = i;
+      }
+    }
+    
+    const nyquistFrequency = audioContext.sampleRate / 2;
+    const frequency = (maxIndex / frequencyData.length) * nyquistFrequency;
+    const amplitude = (maxValue / 255) * 100;
+    
+    document.getElementById('freqValue').textContent = Math.round(frequency);
+    document.getElementById('ampValue').textContent = (Math.log10(maxValue / 255) * 20).toFixed(1);
+    document.getElementById('volValue').textContent = volumePercent + '%';
+    document.getElementById('peakValue').textContent = Math.round((maxValue / 255) * 100) + '%';
+  }
+
+  function switchVisualizer(mode) {
+    visualizerMode = mode;
+    
+    document.getElementById('freqBtn').classList.remove('active');
+    document.getElementById('waveBtn').classList.remove('active');
+    
+    if (mode === 'frequency') {
+      document.getElementById('freqBtn').classList.add('active');
+    } else {
+      document.getElementById('waveBtn').classList.add('active');
+    }
+  }
+
+  function toggleVisualizer() {
+    visualizerEnabled = !visualizerEnabled;
+    const btn = document.getElementById('vizToggleBtn');
+    
+    if (visualizerEnabled) {
+      btn.textContent = '关闭';
+      startVisualization();
+    } else {
+      btn.textContent = '打开';
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+      canvasCtx.fillRect(0, 0, width, height);
+    }
+  }
+
+  // =============== 原有播放器代码 ===============
   let index = 0;
   let isPlaying = false;
   let lyricsVisible = true;
@@ -1442,7 +1620,6 @@
   const mvShowBtn = document.getElementById("mvShowBtn");
   const mvInfo = document.getElementById("mvInfo");
 
-  // 格式化时间
   function formatTime(time) {
     if (!time || isNaN(time)) return "00:00";
     const minutes = Math.floor(time / 60);
@@ -1450,7 +1627,6 @@
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
-  // 显示提示信息
   function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -1461,25 +1637,6 @@
       toast.classList.add('hide');
       setTimeout(() => toast.remove(), 300);
     }, 2500);
-  }
-
-  // =============== MV相关 ===============
-  function loadYouTubeMV(youtubeId) {
-    if (!youtubeId) {
-      youtubeFrame.src = "about:blank";
-      mvInfo.textContent = "❌ 此歌曲暂无MV";
-      return;
-    }
-
-    youtubeFrame.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&modestbranding=1`;
-    mvInfo.textContent = "🎬 正在加载MV，请稍候...";
-  }
-
-  function toggleMVPanel() {
-    mvVisible = !mvVisible;
-    mvPanel.classList.toggle('hidden');
-    mvShowBtn.classList.toggle('active');
-    mvShowBtn.textContent = mvVisible ? '🎬 MV' : '🎬 显示';
   }
 
   // =============== 歌词相关 ===============
@@ -1558,6 +1715,25 @@
     lyricsToggle.textContent = lyricsVisible ? '隐藏' : '显示';
     lyricsToggle.classList.toggle('active');
     lyricsShowBtn.textContent = lyricsVisible ? '📜 歌词' : '📜 显示';
+  }
+
+  // =============== MV相关 ===============
+  function loadYouTubeMV(youtubeId) {
+    if (!youtubeId) {
+      youtubeFrame.src = "about:blank";
+      mvInfo.textContent = "❌ 此歌曲暂无MV";
+      return;
+    }
+
+    youtubeFrame.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=0&controls=1&modestbranding=1`;
+    mvInfo.textContent = "🎬 正在加载MV，请稍候...";
+  }
+
+  function toggleMVPanel() {
+    mvVisible = !mvVisible;
+    mvPanel.classList.toggle('hidden');
+    mvShowBtn.classList.toggle('active');
+    mvShowBtn.textContent = mvVisible ? '🎬 MV' : '🎬 显示';
   }
 
   // =============== 随机播放相关 ===============
@@ -1682,6 +1858,10 @@
 
   // 播放控制
   function togglePlay() {
+    if (!audioContext) {
+      initAudioVisualizer();
+    }
+
     if (isPlaying) {
       audio.pause();
       playBtn.textContent = "▶️ 播放";
