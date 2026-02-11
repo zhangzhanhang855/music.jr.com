@@ -489,6 +489,140 @@
       animation: slideOutDown 0.3s ease forwards;
     }
 
+    /* 歌词显示面板 */
+    .lyrics-panel {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(30, 30, 30, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 229, 255, 0.2);
+      border: 1px solid rgba(0, 229, 255, 0.1);
+      animation: slideIn 0.6s ease 0.2s both;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .lyrics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .lyrics-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #00e5ff;
+      text-shadow: 0 2px 10px rgba(0, 229, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lyrics-title::before {
+      content: "♪";
+      font-size: 20px;
+    }
+
+    .lyrics-toggle {
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      color: #00e5ff;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .lyrics-toggle:hover {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: #00e5ff;
+    }
+
+    .lyrics-toggle.active {
+      background: linear-gradient(135deg, #00e5ff 0%, #00d4ff 100%);
+      color: #000;
+      border-color: #00e5ff;
+    }
+
+    /* 歌词容器 */
+    .lyrics-container {
+      height: 400px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+      border: 1px solid rgba(0, 229, 255, 0.1);
+    }
+
+    .lyrics-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .lyrics-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    .lyrics-container::-webkit-scrollbar-thumb {
+      background: #00e5ff;
+      border-radius: 10px;
+    }
+
+    .lyrics-container::-webkit-scrollbar-thumb:hover {
+      background: #00d4ff;
+    }
+
+    /* 歌词行 */
+    .lyric-line {
+      padding: 10px 15px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      color: #999;
+      font-size: 14px;
+      line-height: 1.6;
+      text-align: center;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    .lyric-line:hover {
+      background: rgba(0, 229, 255, 0.1);
+      border-left-color: #00e5ff;
+      color: #ccc;
+    }
+
+    /* 当前歌词行 */
+    .lyric-line.active {
+      color: #00e5ff;
+      background: rgba(0, 229, 255, 0.15);
+      border-left-color: #00e5ff;
+      font-weight: 600;
+      font-size: 15px;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+    }
+
+    /* 无歌词提示 */
+    .no-lyrics {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #666;
+      font-size: 14px;
+      text-align: center;
+    }
+
     /* 响应式设计 */
     @media (max-width: 768px) {
       .container {
@@ -501,6 +635,14 @@
 
       .playlist {
         max-width: 100%;
+      }
+
+      .lyrics-panel {
+        max-width: 100%;
+      }
+
+      .lyrics-container {
+        height: 300px;
       }
 
       .download-controls {
@@ -626,7 +768,17 @@
     <div class="playlist-title">播放列表</div>
     <div id="playlistContainer"></div>
   </div>
-</div>
+
+  <!-- 歌词面板 -->
+  <div class="lyrics-panel">
+    <div class="lyrics-header">
+      <div class="lyrics-title">歌词</div>
+      <button class="lyrics-toggle active" id="lyricsToggle" onclick="toggleLyricsDisplay()">隐藏</button>
+    </div>
+    <div class="lyrics-container" id="lyricsContainer">
+      <div class="no-lyrics">暂无歌词</div>
+    </div>
+  </div>
 
 <audio id="audio"></audio>
 
@@ -635,37 +787,75 @@
     {
       name: "Faded - Alan Walker",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Faded - Alan Walker.mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Faded - Alan Walker.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Faded - Alan Walker.jpeg",
+      lyrics: `[00:07.68]All this time I fell into your gravity
+[00:15.90]You lift my feet clear off the ground
+[00:24.00]Spinning endlessly, you make me believe
+[00:32.10]I'm lost in your eyes
+[00:40.50]You take my hand and dragging me head first, fearless
+[00:49.02]And I trust the rush
+[00:57.12]'Cause you drown in my eyes
+[01:05.28]And find I'm lost in your gravity
+[01:13.50]And it's all in my head
+[01:21.60]And you make me believe
+[01:29.88]I'm lost in your eyes`
     },
     {
       name: "Heading Home - Alan Walker",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Heading Home - Alan Walker [Normal Quality].mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Heading Home - Alan Walker:Ruben.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Heading Home - Alan Walker:Ruben.jpeg",
+      lyrics: `[00:00.00]I'm heading home
+[00:15.00]I'm heading home
+[00:30.00]Where everything began
+[00:45.00]I'm heading home
+[01:00.00]I'm heading home
+[01:15.00]I'm heading home at last`
     },
     {
       name: "Sunburst - Tobu",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburst - Tobu.mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburstï¼ˆäº'éš™é˜³å…‰ï¼‰ - Tobu:Itro.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Sunburstï¼ˆäº'éš™é˜³å…‰ï¼‰ - Tobu:Itro.jpeg",
+      lyrics: `[00:00.00]Instrumental track - Sunburst
+[00:15.00]Beautiful electronic music
+[00:30.00]Amazing synth melodies
+[00:45.00]Uplifting and energetic
+[01:00.00]Perfect for listening`
     },
     {
       name: "World of Walker: Rise of the drones - Alan Walker",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/Rise of the drones.mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/World of Walker: Rise of the Drones - Alan Walker.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/World of Walker: Rise of the Drones - Alan Walker.jpeg",
+      lyrics: `[00:00.00]Rise of the drones
+[00:15.00]In this digital world
+[00:30.00]We are the machines
+[00:45.00]We are the future`
     },
     {
       name: "The Sky High - Elektronomia",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/The Sky High - Elektronomia.jpeg",
+      lyrics: `[00:00.00]Reaching for the sky
+[00:15.00]Higher than before
+[00:30.00]Flying to the stars
+[00:45.00]Forever in the sky`
     },
     {
       name: "365",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/365.mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/365 - Zedd:Katy Perry.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/365 - Zedd:Katy Perry.jpeg",
+      lyrics: `[00:00.00]We could leave our loving
+[00:10.00]All the love we had before
+[00:20.00]It's a crazy fantasy
+[00:30.00]But we'll always have today`
     },
     {
       name: "BARRETE!",
       url: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/DERRETE!.mp3",
-      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/BARRETE! - CHASHKAKEFIRA:D4C.jpeg"
+      cover: "https://raw.githubusercontent.com/zhangzhanhang855/zhangzhanhang855.github.io/main/BARRETE! - CHASHKAKEFIRA:D4C.jpeg",
+      lyrics: `[00:00.00]Derrete! Derrete!
+[00:15.00]Let it melt away
+[00:30.00]All the pain and sorrow
+[00:45.00]Into a brand new day`
     }
   ];
 
@@ -685,6 +875,9 @@
   const playlistContainer = document.getElementById("playlistContainer");
   const volumeSlider = document.getElementById("volumeSlider");
   const volumeValue = document.getElementById("volumeValue");
+  const lyricsContainer = document.getElementById("lyricsContainer");
+  const lyricsToggle = document.getElementById("lyricsToggle");
+  const lyricsPanel = document.querySelector(".lyrics-panel");
 
   // 格式化时间
   function formatTime(time) {
@@ -705,6 +898,91 @@
       toast.classList.add('hide');
       setTimeout(() => toast.remove(), 300);
     }, 2500);
+  }
+
+  // =============== 歌词相关 ===============
+  let currentLyricsIndex = 0;
+  let parsedLyrics = [];
+
+  // 解析LRC歌词格式
+  function parseLyrics(lyricsText) {
+    const lines = lyricsText.split('\n');
+    const parsed = [];
+    
+    lines.forEach(line => {
+      const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2})\](.*)/);
+      if (match) {
+        const minutes = parseInt(match[1]);
+        const seconds = parseInt(match[2]);
+        const time = minutes * 60 + seconds;
+        const text = match[4].trim();
+        parsed.push({ time, text });
+      }
+    });
+    
+    return parsed.sort((a, b) => a.time - b.time);
+  }
+
+  // 渲染歌词
+  function renderLyrics() {
+    if (!parsedLyrics || parsedLyrics.length === 0) {
+      lyricsContainer.innerHTML = '<div class="no-lyrics">暂无歌词</div>';
+      return;
+    }
+
+    lyricsContainer.innerHTML = parsedLyrics.map((lyric, idx) => 
+      `<div class="lyric-line" data-index="${idx}" onclick="jumpToLyricTime(${lyric.time})">${lyric.text}</div>`
+    ).join('');
+  }
+
+  // 更新当前歌词
+  function updateCurrentLyric() {
+    if (!parsedLyrics || parsedLyrics.length === 0) return;
+
+    const currentTime = audio.currentTime;
+    let newIndex = 0;
+
+    for (let i = 0; i < parsedLyrics.length; i++) {
+      if (parsedLyrics[i].time <= currentTime) {
+        newIndex = i;
+      } else {
+        break;
+      }
+    }
+
+    if (newIndex !== currentLyricsIndex) {
+      // 移除之前的active
+      const prevActive = lyricsContainer.querySelector('.lyric-line.active');
+      if (prevActive) prevActive.classList.remove('active');
+
+      // 添加新的active
+      currentLyricsIndex = newIndex;
+      const newActive = lyricsContainer.querySelector(`[data-index="${newIndex}"]`);
+      if (newActive) {
+        newActive.classList.add('active');
+        // 自动滚动到当前歌词
+        newActive.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }
+
+  // 跳转到歌词对应的时间
+  function jumpToLyricTime(time) {
+    audio.currentTime = time;
+    if (!isPlaying) {
+      audio.play();
+      isPlaying = true;
+      playBtn.textContent = "⏸️ 暂停";
+      bgBlur.classList.add("active");
+    }
+  }
+
+  // 切换歌词显示
+  function toggleLyricsDisplay() {
+    const isHidden = lyricsPanel.style.display === 'none';
+    lyricsPanel.style.display = isHidden ? 'flex' : 'none';
+    lyricsToggle.textContent = isHidden ? '隐藏' : '显示';
+    lyricsToggle.classList.toggle('active');
   }
 
   // 音量控制
@@ -781,6 +1059,17 @@
     title.textContent = songs[i].name;
     cover.src = songs[i].cover;
     bgBlur.style.backgroundImage = `url('${songs[i].cover}')`;
+    
+    // 加载歌词
+    if (songs[i].lyrics) {
+      parsedLyrics = parseLyrics(songs[i].lyrics);
+      currentLyricsIndex = 0;
+      renderLyrics();
+    } else {
+      lyricsContainer.innerHTML = '<div class="no-lyrics">暂无歌词</div>';
+      parsedLyrics = [];
+    }
+    
     updatePlaylist();
   }
 
@@ -829,6 +1118,9 @@
     const percent = (audio.currentTime / audio.duration) * 100;
     progress.style.width = percent + "%";
     currentTimeEl.textContent = formatTime(audio.currentTime);
+    
+    // 更新歌词显示
+    updateCurrentLyric();
   });
 
   // 加载元数据
