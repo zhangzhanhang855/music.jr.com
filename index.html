@@ -1404,125 +1404,178 @@
   // =============== 音频可视化部分 ===============
   let audioContext = null;
   let analyser = null;
-  let dataArray = null;
   let frequencyData = null;
   let canvas = null;
   let canvasCtx = null;
   let animationId = null;
   let visualizerMode = 'frequency'; // 'frequency' 或 'waveform'
   let visualizerEnabled = true;
+  let isVisualizerInitialized = false;
 
   function initAudioVisualizer() {
-    if (audioContext) return;
+    if (isVisualizerInitialized) return;
 
     try {
+      canvas = document.getElementById('visualizerCanvas');
+      if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+      }
+
+      canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
+      
+      // 初始化Canvas尺寸
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      // 创建音频上下文
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       audioContext = new AudioContext();
       
       const source = audioContext.createMediaElementAudioSource(audio);
       analyser = audioContext.createAnalyser();
       
-      analyser.fftSize = 2048;
+      // 设置FFT大小
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.8;
+      
+      // 连接节点
       source.connect(analyser);
       analyser.connect(audioContext.destination);
       
+      // 创建频率数据数组
       frequencyData = new Uint8Array(analyser.frequencyBinCount);
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
       
-      canvas = document.getElementById('visualizerCanvas');
-      canvasCtx = canvas.getContext('2d');
+      isVisualizerInitialized = true;
+      console.log('Audio visualizer initialized successfully');
       
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-      startVisualization();
+      // 立即开始可视化
+      if (visualizerEnabled) {
+        startVisualization();
+      }
     } catch (e) {
       console.error('Audio visualizer initialization failed:', e);
+      // 降级处理：显示演示频谱
+      showDemoVisualizer();
     }
   }
 
   function resizeCanvas() {
     if (!canvas) return;
-    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-    canvasCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    
+    // 设置实际渲染分辨率
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    
+    // 缩放上下文
+    canvasCtx.scale(dpr, dpr);
   }
 
   function startVisualization() {
-    if (!visualizerEnabled || !analyser) return;
+    if (!visualizerEnabled || !canvas) return;
 
     const draw = () => {
       animationId = requestAnimationFrame(draw);
       
-      if (visualizerMode === 'frequency') {
-        drawFrequencyBars();
+      if (isVisualizerInitialized && analyser) {
+        if (visualizerMode === 'frequency') {
+          drawFrequencyBars();
+        } else {
+          drawWaveform();
+        }
+        updateAudioStats();
       } else {
-        drawWaveform();
+        // 如果未初始化，显示演示效果
+        showDemoVisualizer();
       }
-      
-      updateAudioStats();
     };
 
     draw();
   }
 
   function drawFrequencyBars() {
+    if (!analyser || !frequencyData) return;
+    
+    // 获取频率数据
     analyser.getByteFrequencyData(frequencyData);
     
-    const width = canvas.offsetWidth;
-    const height = canvas.offsetHeight;
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
     
     // 清除背景
-    canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+    canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.9)';
     canvasCtx.fillRect(0, 0, width, height);
     
-    const barCount = 64;
+    const barCount = Math.min(64, frequencyData.length);
     const barWidth = width / barCount;
     const step = Math.floor(frequencyData.length / barCount);
     
+    // 绘制柱子
     for (let i = 0; i < barCount; i++) {
-      const value = frequencyData[i * step] || 0;
-      const barHeight = (value / 255) * height;
+      const dataIndex = i * step;
+      const value = frequencyData[dataIndex] || 0;
+      const barHeight = (value / 255) * (height * 0.9);
+      const x = i * barWidth;
+      const y = height - barHeight;
       
       // 渐变颜色：青色 -> 紫色 -> 粉色
-      const hue = (i / barCount) * 120 + 180; // 从青色到粉色
+      const hue = (i / barCount) * 120 + 180;
       canvasCtx.fillStyle = `hsl(${hue}, 100%, 50%)`;
       
+      // 添加发光效果
+      canvasCtx.shadowColor = `hsl(${hue}, 100%, 50%)`;
+      canvasCtx.shadowBlur = 10;
+      
       canvasCtx.fillRect(
-        i * barWidth,
-        height - barHeight,
+        x + barWidth * 0.1,
+        y,
         barWidth * 0.8,
         barHeight
       );
     }
+    
+    canvasCtx.shadowColor = 'transparent';
   }
 
   function drawWaveform() {
+    if (!analyser || !frequencyData) return;
+    
+    // 使用 getByteFrequencyData 作为波形
     analyser.getByteFrequencyData(frequencyData);
     
-    const width = canvas.offsetWidth;
-    const height = canvas.offsetHeight;
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
     const centerY = height / 2;
     
     // 清除背景
-    canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.8)';
+    canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.9)';
     canvasCtx.fillRect(0, 0, width, height);
     
     // 绘制波形线
     canvasCtx.strokeStyle = '#00e5ff';
     canvasCtx.lineWidth = 2;
-    canvasCtx.shadowColor = 'rgba(0, 229, 255, 0.6)';
-    canvasCtx.shadowBlur = 10;
+    canvasCtx.shadowColor = 'rgba(0, 229, 255, 0.8)';
+    canvasCtx.shadowBlur = 15;
+    canvasCtx.lineCap = 'round';
+    canvasCtx.lineJoin = 'round';
     canvasCtx.beginPath();
     
     const sliceWidth = width / frequencyData.length;
     let x = 0;
+    let isFirstPoint = true;
     
     for (let i = 0; i < frequencyData.length; i++) {
       const v = frequencyData[i] / 128.0;
       const y = (v * height) / 2;
       
-      if (i === 0) {
+      if (isFirstPoint) {
         canvasCtx.moveTo(x, centerY - y);
+        isFirstPoint = false;
       } else {
         canvasCtx.lineTo(x, centerY - y);
       }
@@ -1535,37 +1588,108 @@
     canvasCtx.shadowColor = 'transparent';
   }
 
-  function updateAudioStats() {
-    if (!analyser) return;
-
-    analyser.getByteFrequencyData(frequencyData);
+  function showDemoVisualizer() {
+    if (!canvasCtx) return;
     
-    // 计算平均音量
-    let sum = 0;
-    for (let i = 0; i < frequencyData.length; i++) {
-      sum += frequencyData[i];
-    }
-    const average = Math.round(sum / frequencyData.length);
-    const volumePercent = Math.round((average / 255) * 100);
+    const rect = canvas.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
     
-    // 找最高频率
-    let maxValue = 0;
-    let maxIndex = 0;
-    for (let i = 0; i < frequencyData.length; i++) {
-      if (frequencyData[i] > maxValue) {
-        maxValue = frequencyData[i];
-        maxIndex = i;
+    // 清除背景
+    canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.9)';
+    canvasCtx.fillRect(0, 0, width, height);
+    
+    if (visualizerMode === 'frequency') {
+      // 演示频谱
+      const barCount = 64;
+      const barWidth = width / barCount;
+      
+      for (let i = 0; i < barCount; i++) {
+        const value = Math.random() * 200 + 50;
+        const barHeight = (value / 255) * (height * 0.9);
+        const x = i * barWidth;
+        const y = height - barHeight;
+        
+        const hue = (i / barCount) * 120 + 180;
+        canvasCtx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+        canvasCtx.shadowColor = `hsl(${hue}, 100%, 50%)`;
+        canvasCtx.shadowBlur = 10;
+        
+        canvasCtx.fillRect(
+          x + barWidth * 0.1,
+          y,
+          barWidth * 0.8,
+          barHeight
+        );
       }
+    } else {
+      // 演示波形
+      const centerY = height / 2;
+      canvasCtx.strokeStyle = '#00e5ff';
+      canvasCtx.lineWidth = 2;
+      canvasCtx.shadowColor = 'rgba(0, 229, 255, 0.8)';
+      canvasCtx.shadowBlur = 15;
+      canvasCtx.lineCap = 'round';
+      canvasCtx.lineJoin = 'round';
+      canvasCtx.beginPath();
+      
+      const points = 128;
+      const sliceWidth = width / points;
+      
+      for (let i = 0; i < points; i++) {
+        const v = (Math.sin(i / 10) * 0.5 + 0.5) * Math.random();
+        const y = (v * height) / 2;
+        const x = i * sliceWidth;
+        
+        if (i === 0) {
+          canvasCtx.moveTo(x, centerY - y);
+        } else {
+          canvasCtx.lineTo(x, centerY - y);
+        }
+      }
+      
+      canvasCtx.lineTo(width, centerY);
+      canvasCtx.stroke();
     }
     
-    const nyquistFrequency = audioContext.sampleRate / 2;
-    const frequency = (maxIndex / frequencyData.length) * nyquistFrequency;
-    const amplitude = (maxValue / 255) * 100;
-    
-    document.getElementById('freqValue').textContent = Math.round(frequency);
-    document.getElementById('ampValue').textContent = (Math.log10(maxValue / 255) * 20).toFixed(1);
-    document.getElementById('volValue').textContent = volumePercent + '%';
-    document.getElementById('peakValue').textContent = Math.round((maxValue / 255) * 100) + '%';
+    canvasCtx.shadowColor = 'transparent';
+  }
+
+  function updateAudioStats() {
+    if (!analyser || !frequencyData) return;
+
+    try {
+      analyser.getByteFrequencyData(frequencyData);
+      
+      // 计算平均音量
+      let sum = 0;
+      for (let i = 0; i < frequencyData.length; i++) {
+        sum += frequencyData[i];
+      }
+      const average = Math.round(sum / frequencyData.length);
+      const volumePercent = Math.round((average / 255) * 100);
+      
+      // 找最高频率
+      let maxValue = 0;
+      let maxIndex = 0;
+      for (let i = 0; i < frequencyData.length; i++) {
+        if (frequencyData[i] > maxValue) {
+          maxValue = frequencyData[i];
+          maxIndex = i;
+        }
+      }
+      
+      const nyquistFrequency = audioContext.sampleRate / 2;
+      const frequency = (maxIndex / frequencyData.length) * nyquistFrequency;
+      const dbValue = maxValue > 0 ? (Math.log10(maxValue / 255) * 20).toFixed(1) : '-∞';
+      
+      document.getElementById('freqValue').textContent = Math.round(frequency);
+      document.getElementById('ampValue').textContent = dbValue;
+      document.getElementById('volValue').textContent = volumePercent + '%';
+      document.getElementById('peakValue').textContent = Math.round((maxValue / 255) * 100) + '%';
+    } catch (e) {
+      console.error('Error updating audio stats:', e);
+    }
   }
 
   function switchVisualizer(mode) {
@@ -1587,16 +1711,17 @@
     
     if (visualizerEnabled) {
       btn.textContent = '关闭';
-      startVisualization();
+      if (isVisualizerInitialized) {
+        startVisualization();
+      } else {
+        initAudioVisualizer();
+      }
     } else {
       btn.textContent = '打开';
       if (animationId) {
         cancelAnimationFrame(animationId);
+        animationId = null;
       }
-      const width = canvas.offsetWidth;
-      const height = canvas.offsetHeight;
-      canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.8)';
-      canvasCtx.fillRect(0, 0, width, height);
     }
   }
 
@@ -1714,6 +1839,12 @@
     audio.currentTime = time;
     if (!isPlaying) {
       audio.play();
+      
+      // 初始化可视化器
+      if (!isVisualizerInitialized && visualizerEnabled) {
+        initAudioVisualizer();
+      }
+      
       isPlaying = true;
       playBtn.textContent = "⏸️ 暂停";
       bgBlur.classList.add("active");
@@ -1869,7 +2000,8 @@
 
   // 播放控制
   function togglePlay() {
-    if (!audioContext) {
+    // 首次播放时初始化可视化器
+    if (!isVisualizerInitialized && visualizerEnabled) {
       initAudioVisualizer();
     }
 
@@ -1889,6 +2021,12 @@
     index = getNextIndex();
     loadSong(index);
     audio.play();
+    
+    // 初始化可视化器
+    if (!isVisualizerInitialized && visualizerEnabled) {
+      initAudioVisualizer();
+    }
+    
     isPlaying = true;
     playBtn.textContent = "⏸️ 暂停";
     bgBlur.classList.add("active");
@@ -1908,6 +2046,12 @@
     
     loadSong(index);
     audio.play();
+    
+    // 初始化可视化器
+    if (!isVisualizerInitialized && visualizerEnabled) {
+      initAudioVisualizer();
+    }
+    
     isPlaying = true;
     playBtn.textContent = "⏸️ 暂停";
     bgBlur.classList.add("active");
@@ -1958,6 +2102,12 @@
     }
     loadSong(i);
     audio.play();
+    
+    // 初始化可视化器
+    if (!isVisualizerInitialized && visualizerEnabled) {
+      initAudioVisualizer();
+    }
+    
     isPlaying = true;
     playBtn.textContent = "⏸️ 暂停";
     bgBlur.classList.add("active");
@@ -1966,6 +2116,28 @@
   // 初始化
   loadSong(index);
   updatePlaylist();
+  
+  // 预初始化Canvas（不初始化AudioContext）
+  window.addEventListener('load', () => {
+    canvas = document.getElementById('visualizerCanvas');
+    if (canvas) {
+      canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
+      resizeCanvas();
+      // 绘制初始化画面
+      showDemoVisualizer();
+    }
+  });
+  
+  // 或者立即初始化
+  setTimeout(() => {
+    canvas = document.getElementById('visualizerCanvas');
+    if (canvas) {
+      canvasCtx = canvas.getContext('2d', { willReadFrequently: true });
+      resizeCanvas();
+      // 绘制初始化画面
+      showDemoVisualizer();
+    }
+  }, 100);
 </script>
 
 </body>
