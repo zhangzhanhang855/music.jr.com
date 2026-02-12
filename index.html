@@ -2,321 +2,244 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>斗地主·智胜版 - 人机对战</title>
+    <title>五人斗地主 (两副牌专业版)</title>
     <style>
-        :root {
-            --bg: #1a472a;
-            --card-w: 80px;
-            --card-h: 110px;
-            --gold: #ffd700;
-        }
-        body { margin: 0; background: var(--bg); font-family: "PingFang SC", "Microsoft YaHei"; color: white; overflow: hidden; user-select: none; }
+        :root { --bg: #0a3d1d; --gold: #ffd700; --card-w: 70px; --card-h: 100px; }
+        body { margin: 0; background: var(--bg); font-family: "Segoe UI", sans-serif; color: white; overflow: hidden; }
         
-        /* 顶部信息栏 */
-        #header { height: 50px; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-around; padding: 0 20px; }
-        .dizhu-view { display: flex; gap: 5px; }
-        .tiny-card { width: 30px; height: 40px; background: white; border-radius: 3px; color: black; font-size: 12px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        /* 顶部状态 */
+        #header { height: 50px; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: space-around; font-size: 14px; }
+        .dz-info { border: 1px solid var(--gold); padding: 2px 10px; border-radius: 4px; display: flex; gap: 5px; }
 
-        /* 游戏主舞台 */
+        /* 5人环形布局区域 */
         #stage { height: calc(100vh - 50px); position: relative; }
-        .player-info { position: absolute; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 15px; font-size: 14px; border: 1px solid var(--gold); }
-        #info-1 { top: 20%; left: 20px; } /* 电脑1 (左) */
-        #info-2 { top: 20%; right: 20px; } /* 电脑2 (右) */
+        .player-tag { position: absolute; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 10px; font-size: 12px; z-index: 5; border: 1px solid #555; }
+        
+        /* 玩家位置定义 */
+        .pos-1 { left: 20px; top: 50%; transform: translateY(-50%); } /* 左二 */
+        .pos-2 { left: 150px; top: 15%; } /* 左一 */
+        .pos-3 { right: 150px; top: 15%; } /* 右一 */
+        .pos-4 { right: 20px; top: 50%; transform: translateY(-50%); } /* 右二 */
+        
+        /* 手牌与桌面 */
+        .hand { position: absolute; display: flex; justify-content: center; }
+        #hand-0 { bottom: 20px; width: 100%; height: var(--card-h); z-index: 100; }
+        .comp-hand { font-size: 12px; color: #ccc; }
 
-        /* 手牌区域 */
-        .hand { position: absolute; display: flex; justify-content: center; transition: 0.3s; }
-        #hand-0 { bottom: 30px; width: 100%; height: var(--card-h); z-index: 10; }
-        #hand-1 { left: 50px; top: 30%; flex-direction: column; }
-        #hand-2 { right: 50px; top: 30%; flex-direction: column; }
-
-        /* 卡牌样式 */
         .card {
-            width: var(--card-w); height: var(--card-h);
-            background: white; border-radius: 8px; border: 1px solid #999;
-            box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
-            position: relative; margin-left: -45px; /* 叠放 */
-            display: flex; flex-direction: column; padding: 5px; box-sizing: border-box;
-            cursor: pointer; transition: transform 0.1s, margin-top 0.2s;
-            color: black;
+            width: var(--card-w); height: var(--card-h); background: white; border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3); color: black; padding: 4px;
+            box-sizing: border-box; display: flex; flex-direction: column;
+            margin-left: -50px; transition: 0.2s; border: 1px solid #999; cursor: pointer;
         }
         #hand-0 .card:first-child { margin-left: 0; }
-        .card.selected { margin-top: -30px; border: 3px solid var(--gold); }
-        .card.red { color: #d00; }
-        .card.back { background: linear-gradient(135deg, #2c3e50, #000); border: 2px solid #fff; }
-        .card .val { font-size: 22px; font-weight: 900; line-height: 1; }
-        .card .suit { font-size: 16px; align-self: flex-start; }
+        .card.selected { transform: translateY(-25px); border: 3px solid #ff4400; }
+        .card.red { color: #d32f2f; }
+        .card.back { background: #2c3e50; border: 1px solid #fff; }
 
-        /* 出牌区 */
-        .desk-area { position: absolute; width: 300px; height: 120px; display: flex; justify-content: center; align-items: center; transform: translateX(-50%); left: 50%; }
-        #desk-0 { bottom: 180px; }
-        #desk-1 { top: 30%; left: 250px; }
-        #desk-2 { top: 30%; left: calc(100% - 250px); }
+        /* 出牌区 (5个) */
+        .desk { position: absolute; display: flex; justify-content: center; width: 300px; height: 100px; transform: translateX(-50%); left: 50%; }
+        #desk-0 { bottom: 160px; }
+        #desk-1 { left: 220px; top: 50%; }
+        #desk-2 { left: 350px; top: 25%; }
+        #desk-3 { right: 50px; top: 25%; }
+        #desk-4 { right: -80px; top: 50%; }
 
-        /* 控制按钮 */
-        #controls { position: absolute; bottom: 150px; width: 100%; display: flex; justify-content: center; gap: 15px; pointer-events: none; opacity: 0; transition: 0.3s; }
-        #controls.active { pointer-events: auto; opacity: 1; }
-        button { 
-            padding: 8px 25px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer;
-            box-shadow: 0 4px 0 #b8860b; background: linear-gradient(#ffd700, #daa520);
-        }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #b8860b; }
-        button:disabled { background: #888; box-shadow: 0 4px 0 #555; cursor: not-allowed; }
-
-        select { background: #333; color: white; border: 1px solid var(--gold); padding: 5px; border-radius: 5px; }
-
-        .msg { font-size: 24px; color: var(--gold); text-shadow: 2px 2px 4px black; }
+        #controls { position: absolute; bottom: 135px; width: 100%; display: flex; justify-content: center; gap: 15px; visibility: hidden; }
+        button { padding: 8px 20px; border-radius: 15px; border: none; background: var(--gold); font-weight: bold; cursor: pointer; }
+        .msg { font-size: 20px; color: var(--gold); font-weight: bold; text-shadow: 1px 1px 2px #000; }
     </style>
 </head>
 <body>
 
 <div id="header">
-    <div>
-        难度: 
-        <select id="diff-level">
-            <option value="0">小白 (乱出)</option>
-            <option value="1">新手 (会出对子)</option>
-            <option value="2" selected>普通 (平均水平)</option>
-            <option value="3">老手 (策略性跑牌)</option>
-            <option value="4">高手 (防守严密)</option>
-            <option value="5">大师 (会算牌拆牌)</option>
-            <option value="6">魔鬼 (地狱级逻辑)</option>
-        </select>
-    </div>
-    <div class="dizhu-view" id="dz-cards"></div>
-    <button onclick="initGame()">重开游戏</button>
+    <div>模式: 5人/2副牌</div>
+    <div id="dz-area" class="dz-info">地主牌加载中...</div>
+    <div>难度: <select id="ai-level"><option value="3">老手</option><option value="6">魔鬼</option></select></div>
+    <button onclick="initGame()">重新发牌</button>
 </div>
 
 <div id="stage">
-    <div id="info-1" class="player-info">电脑1: 17张</div>
-    <div id="info-2" class="player-info">电脑2: 17张</div>
+    <div class="player-tag pos-1">电脑1: <span id="cnt-1">21</span>张</div>
+    <div class="player-tag pos-2">电脑2: <span id="cnt-2">21</span>张</div>
+    <div class="player-tag pos-3">电脑3: <span id="cnt-3">21</span>张</div>
+    <div class="player-tag pos-4">电脑4: <span id="cnt-4">21</span>张</div>
 
-    <div id="hand-1" class="hand"></div>
-    <div id="hand-2" class="hand"></div>
-    
-    <div id="desk-1" class="desk-area"></div>
-    <div id="desk-2" class="desk-area"></div>
-    <div id="desk-0" class="desk-area"></div>
+    <div id="desk-1" class="desk"></div>
+    <div id="desk-2" class="desk"></div>
+    <div id="desk-3" class="desk"></div>
+    <div id="desk-4" class="desk"></div>
+    <div id="desk-0" class="desk"></div>
 
     <div id="controls">
         <button onclick="handlePlay()">出牌</button>
-        <button onclick="handlePass()">不要</button>
+        <button id="btn-pass" onclick="handlePass()">不要</button>
     </div>
 
     <div id="hand-0" class="hand"></div>
 </div>
 
 <script>
-/** * 斗地主核心逻辑重写 
- */
-const CARD_MAP = { '3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14,'2':15,'小王':16,'大王':17 };
-const SUITS = ['♠','♥','♣','♦'];
-let state = {
-    hands: [[], [], []],
-    dzCards: [],
-    lastMove: { player: -1, cards: [], type: null, power: 0 },
-    turn: 0,
-    selected: new Set()
-};
+const VALUES = { '3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14,'2':15,'小王':16,'大王':17 };
+let game = { hands: [[],[],[],[],[]], last: null, turn: 0, selected: new Set(), dizhu: 0 };
 
-// --- 初始化 ---
 function initGame() {
     let deck = [];
-    for(let v in CARD_MAP) {
-        if(v === '小王' || v === '大王') {
-            deck.push({v, p: CARD_MAP[v], s: '🃏', c: v==='大王'?'red':'black'});
-        } else {
-            SUITS.forEach(s => deck.push({v, p: CARD_MAP[v], s, c: (s==='♥'||s==='♦'?'red':'black')}));
+    // 生成两副牌
+    for(let i=0; i<2; i++) {
+        for(let v in VALUES) {
+            if(v.includes('王')) deck.push({v, p:VALUES[v], s:'🃏', c:v==='大王'?'red':'black'});
+            else ['♠','♥','♣','♦'].forEach(s => deck.push({v, p:VALUES[v], s, c:(s==='♥'||s==='♦'?'red':'black')}));
         }
     }
     deck.sort(() => Math.random() - 0.5);
 
-    state.hands = [
-        deck.slice(0, 17).sort((a,b)=>b.p-a.p),
-        deck.slice(17, 34).sort((a,b)=>b.p-a.p),
-        deck.slice(34, 51).sort((a,b)=>b.p-a.p)
+    // 5人每人21张，留3张地主牌 (21*5 + 3 = 108)
+    game.hands = [
+        deck.slice(0, 21).sort((a,b)=>b.p-a.p),
+        deck.slice(21, 42).sort((a,b)=>b.p-a.p),
+        deck.slice(42, 63).sort((a,b)=>b.p-a.p),
+        deck.slice(63, 84).sort((a,b)=>b.p-a.p),
+        deck.slice(84, 105).sort((a,b)=>b.p-a.p)
     ];
-    state.dzCards = deck.slice(51);
-    // 默认玩家是地主
-    state.hands[0] = [...state.hands[0], ...state.dzCards].sort((a,b)=>b.p-a.p);
-    state.turn = 0;
-    state.lastMove = { player: -1, cards: [] };
-    state.selected.clear();
-
-    renderDizhu();
+    let dzCards = deck.slice(105);
+    game.dizhu = 0; // 默认玩家是地主
+    game.hands[0] = [...game.hands[0], ...dzCards].sort((a,b)=>b.p-a.p);
+    
+    game.last = null; game.turn = 0; game.selected.clear();
+    
+    document.getElementById('dz-area').innerHTML = dzCards.map(c=>`<span style="color:${c.c}">${c.v}</span>`).join(' ');
     renderAll();
     checkTurn();
 }
 
-// --- 牌型判断 ---
 function getCardsInfo(cards) {
     if(!cards.length) return null;
-    const s = [...cards].sort((a,b)=>a.p - b.p);
-    const len = s.length;
-    
-    if(len === 1) return { type: 'single', power: s[0].p };
-    if(len === 2) {
-        if(s[0].p === s[1].p) return { type: 'pair', power: s[0].p };
-        if(s[0].p >= 16 && s[1].p >= 16) return { type: 'bomb', power: 99 }; // 王炸
-    }
-    if(len === 3 && s[0].p === s[2].p) return { type: 'trio', power: s[0].p };
-    if(len === 4 && s[0].p === s[3].p) return { type: 'bomb', power: s[0].p };
-    
-    return null; // 更多(顺子/三带)省略以便核心展示
-}
-
-// --- AI 逻辑 ---
-function aiMove() {
-    const level = parseInt(document.getElementById('diff-level').value);
-    const hand = state.hands[state.turn];
-    let toPlay = [];
-
-    // 1. 如果是出牌权在手 (自己大或者新局)
-    if (state.lastMove.player === -1 || state.lastMove.player === state.turn) {
-        // 魔鬼/大师优先出最少的组合，小白随便出一张最小的
-        if(level >= 4) {
-            const pairs = findGroup(hand, 2);
-            toPlay = pairs.length > 0 ? pairs[0] : [hand[hand.length-1]];
-        } else {
-            toPlay = [hand[hand.length-1]];
-        }
-    } 
-    // 2. 跟牌
-    else {
-        const last = getCardsInfo(state.lastMove.cards);
-        const myPairs = findGroup(hand, 2);
-        const mySingles = hand;
-
-        if(last.type === 'single') {
-            const bigger = hand.filter(c => c.p > last.power).reverse();
-            if(bigger.length > 0) {
-                // 难度策略
-                if(level === 0 && Math.random() > 0.4) toPlay = []; // 小白经常发呆
-                else if(level <= 2) toPlay = [bigger[0]]; // 普通: 出最小的压
-                else if(level >= 5 && bigger[0].p >= 15 && hand.length > 2) toPlay = []; // 大师: 不舍得用2压小牌
-                else toPlay = [bigger[0]];
-            }
-        } else if(last.type === 'pair') {
-            const biggerPair = myPairs.filter(p => p[0].p > last.power).reverse();
-            if(biggerPair.length > 0) toPlay = biggerPair[0];
-        }
-
-        // 3. 炸弹逻辑 (老手以上会用炸弹)
-        if(toPlay.length === 0 && level >= 3) {
-            const bombs = findGroup(hand, 4);
-            if(bombs.length > 0) {
-                // 魔鬼难度会在你剩牌少于3张时才轰炸
-                if(level < 6 || state.hands[state.lastMove.player].length < 5) toPlay = bombs[0];
-            }
-        }
-    }
-
-    if(toPlay.length > 0) {
-        executeMove(state.turn, toPlay);
-    } else {
-        handlePass();
-    }
-}
-
-function findGroup(hand, size) {
-    let res = [];
     let counts = {};
-    hand.forEach(c => counts[c.p] = (counts[c.p] || 0) + 1);
-    for(let p in counts) {
-        if(counts[p] >= size) {
-            res.push(hand.filter(c => c.p == p).slice(0, size));
-        }
+    cards.forEach(c => counts[c.p] = (counts[c.p] || 0) + 1);
+    let sorted = Object.entries(counts).map(e=>({p:Number(e[0]), c:e[1]})).sort((a,b)=>b.c - a.c || b.p - a.p);
+    let len = cards.length;
+    let main = sorted[0];
+
+    // 基础牌型
+    if(sorted.length === 1) {
+        if(len <= 3) return { type: ['single','pair','trio'][len-1], p: main.p, len };
+        if(len >= 4) return { type: 'bomb', p: main.p, len: len + 10 }; // 两副牌，炸弹长度即威力
     }
-    return res;
+    
+    // 王炸 (两副牌支持 2-4 张王组成的超级炸弹)
+    let jokerCount = cards.filter(c => c.p >= 16).length;
+    if(jokerCount === len && len >= 2) return { type: 'bomb', p: 99, len: len + 20 };
+
+    // 三带/四带
+    if(len === 4 && main.c === 3) return { type: 'trio_1', p: main.p, len: 4 };
+    if(len === 5 && main.c === 3 && sorted[1].c === 2) return { type: 'trio_2', p: main.p, len: 5 };
+    if(len === 6 && main.c === 4) return { type: 'four_2', p: main.p, len: 6 };
+
+    // 顺子/连对 (逻辑同单副)
+    if(len >= 5 && sorted.every(e => e.c === 1)) {
+        let ps = sorted.map(e=>e.p).sort((a,b)=>a-b);
+        if(ps[len-1] < 15 && ps[len-1]-ps[0] === len-1) return { type: 'straight', p: ps[0], len };
+    }
+
+    return null;
 }
 
-// --- 游戏流程 ---
-function executeMove(pIdx, cards) {
-    state.hands[pIdx] = state.hands[pIdx].filter(c => !cards.includes(c));
-    state.lastMove = { player: pIdx, cards: cards };
-    
-    // 清空桌面上该位置的“不要”
-    document.getElementById(`desk-${pIdx}`).innerHTML = renderCardsHTML(cards);
-    
-    if(state.hands[pIdx].length === 0) {
-        setTimeout(() => { alert(pIdx === 0 ? "你赢了！" : `电脑${pIdx}号赢了！`); initGame(); }, 200);
-        return;
-    }
-    
-    nextTurn();
+function renderAll() {
+    const h0 = document.getElementById('hand-0');
+    h0.innerHTML = "";
+    game.hands[0].forEach((c, i) => {
+        let div = document.createElement('div');
+        div.className = `card ${c.c} ${game.selected.has(i)?'selected':''}`;
+        div.innerHTML = `<span style="font-size:18px;font-weight:bold">${c.v}</span><span style="align-self:flex-end">${c.s}</span>`;
+        div.onclick = () => { game.selected.has(i)?game.selected.delete(i):game.selected.add(i); renderAll(); };
+        h0.appendChild(div);
+    });
+
+    for(let i=1; i<=4; i++) document.getElementById(`cnt-${i}`).innerText = game.hands[i].length;
+    document.getElementById('controls').style.visibility = game.turn === 0 ? 'visible' : 'hidden';
+    document.getElementById('btn-pass').disabled = !game.last || game.last.player === 0;
 }
 
 function handlePlay() {
-    const cards = Array.from(state.selected).map(idx => state.hands[0][idx]);
-    const info = getCardsInfo(cards);
-    
-    if(!info) return alert("无效牌型");
-    
-    if(state.lastMove.player !== -1 && state.lastMove.player !== 0) {
-        const last = getCardsInfo(state.lastMove.cards);
-        if(info.type !== 'bomb' && info.type !== last.type) return alert("牌型不符");
-        if(info.power <= last.power) return alert("不够大");
-    }
+    let cards = Array.from(game.selected).map(i => game.hands[0][i]);
+    let info = getCardsInfo(cards);
+    if(!info) return alert("非法牌型");
 
-    state.selected.clear();
-    executeMove(0, cards);
+    if(game.last && game.last.player !== 0) {
+        let lastInfo = getCardsInfo(game.last.cards);
+        if(info.type === 'bomb') {
+            if(lastInfo.type === 'bomb' && info.len <= lastInfo.len) return alert("炸弹不够大");
+        } else {
+            if(info.type !== lastInfo.type || info.len !== lastInfo.len || info.p <= lastInfo.p) return alert("压不住");
+        }
+    }
+    execute(cards);
 }
 
 function handlePass() {
-    if(state.lastMove.player === -1 || state.lastMove.player === state.turn) return;
-    document.getElementById(`desk-${state.turn}`).innerHTML = '<div class="msg">不要</div>';
+    document.getElementById(`desk-${game.turn}`).innerHTML = '<span class="msg">不要</span>';
+    nextTurn();
+}
+
+function execute(cards) {
+    game.hands[game.turn] = game.hands[game.turn].filter(c => !cards.includes(c));
+    game.last = { player: game.turn, cards };
+    document.getElementById(`desk-${game.turn}`).innerHTML = cards.map(c => 
+        `<div class="card ${c.c}" style="margin-left:-55px; transform:scale(0.8)"><span style="font-size:18px;font-weight:bold">${c.v}</span><span>${c.s}</span></div>`
+    ).join('');
+    
+    if(game.hands[game.turn].length === 0) {
+        alert(game.turn === 0 ? "地主胜！" : "农民胜！");
+        initGame();
+        return;
+    }
+    game.selected.clear();
     nextTurn();
 }
 
 function nextTurn() {
-    state.turn = (state.turn + 1) % 3;
-    // 清除该玩家上一轮在桌上的牌
-    document.getElementById(`desk-${state.turn}`).innerHTML = '';
+    game.turn = (game.turn + 1) % 5;
+    document.getElementById(`desk-${game.turn}`).innerHTML = "";
     renderAll();
     checkTurn();
 }
 
 function checkTurn() {
-    const ctrl = document.getElementById('controls');
-    if(state.turn === 0) {
-        ctrl.classList.add('active');
-    } else {
-        ctrl.classList.remove('active');
-        setTimeout(aiMove, 800 + Math.random() * 1000);
+    if(game.turn !== 0) {
+        setTimeout(aiThink, 800);
     }
 }
 
-// --- 渲染 ---
-function renderAll() {
-    const h0 = document.getElementById('hand-0');
-    h0.innerHTML = '';
-    state.hands[0].forEach((c, i) => {
-        const div = document.createElement('div');
-        div.className = `card ${c.c} ${state.selected.has(i)?'selected':''}`;
-        div.innerHTML = `<span class="val">${c.v}</span><span class="suit">${c.s}</span>`;
-        div.onclick = () => { state.selected.has(i)?state.selected.delete(i):state.selected.add(i); renderAll(); };
-        h0.appendChild(div);
-    });
-
-    document.getElementById('hand-1').innerHTML = state.hands[1].map(() => '<div class="card back"></div>').join('');
-    document.getElementById('hand-2').innerHTML = state.hands[2].map(() => '<div class="card back"></div>').join('');
+function aiThink() {
+    let hand = game.hands[game.turn];
+    let toPlay = [];
     
-    document.getElementById('info-1').innerText = `电脑1: ${state.hands[1].length}张`;
-    document.getElementById('info-2').innerText = `电脑2: ${state.hands[2].length}张`;
-}
+    if(!game.last || game.last.player === game.turn) {
+        toPlay = [hand[hand.length-1]]; // 出一张最小的
+    } else {
+        let lastInfo = getCardsInfo(game.last.cards);
+        // AI 简化匹配逻辑：尝试单张或对子
+        if(lastInfo.type === 'single') {
+            let bigger = hand.filter(c => c.p > lastInfo.p).reverse();
+            if(bigger.length) toPlay = [bigger[0]];
+        } else if(lastInfo.type === 'pair') {
+            for(let i=0; i<hand.length-1; i++) {
+                if(hand[i].p === hand[i+1].p && hand[i].p > lastInfo.p) {
+                    toPlay = [hand[i], hand[i+1]]; break;
+                }
+            }
+        }
+        // 难度较高时，AI会考虑炸弹
+        if(!toPlay.length && lastInfo.type !== 'bomb' && hand.length > 5) {
+            // 简单找炸弹
+            let counts = {}; hand.forEach(c => counts[c.p] = (counts[c.p]||0)+1);
+            for(let p in counts) if(counts[p] >= 4) { toPlay = hand.filter(c=>c.p==p); break; }
+        }
+    }
 
-function renderDizhu() {
-    document.getElementById('dz-cards').innerHTML = state.dzCards.map(c => 
-        `<div class="tiny-card" style="color:${c.c}">${c.v}</div>`
-    ).join('');
-}
-
-function renderCardsHTML(cards) {
-    return cards.map(c => `
-        <div class="card ${c.c}" style="margin-left:-50px; cursor:default; transform:scale(0.8)">
-            <span class="val">${c.v}</span><span class="suit">${c.s}</span>
-        </div>
-    `).join('');
+    if(toPlay.length) execute(toPlay);
+    else handlePass();
 }
 
 initGame();
