@@ -2,143 +2,109 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>PIXEL POKER: FULL EDITION</title>
+    <title>PIXEL POKER: ELITE EDITION</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         :root {
-            --pixel-bg: #1a1c2c;
-            --pixel-card: #f4f4f4;
-            --pixel-border: #000;
-            --pixel-gold: #f4b41b;
-            --pixel-red: #ef7d57;
-            --pixel-blue: #3b5dc9;
+            --bg: #12121c;
+            --card-front: #f0f0f0;
+            --pixel-gold: #ffcc00;
+            --pixel-red: #ff4d4d;
         }
 
         body {
-            margin: 0;
-            background-color: var(--pixel-bg);
-            font-family: 'Press Start 2P', 'Courier New', cursive;
-            color: white;
-            image-rendering: pixelated;
-            overflow: hidden;
+            margin: 0; background-color: var(--bg);
+            font-family: 'Press Start 2P', cursive;
+            color: white; image-rendering: pixelated; overflow: hidden;
         }
 
-        #game-container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 30px; /* 远离边距 */
-            box-sizing: border-box;
+        #stage {
+            height: 100vh; display: flex; flex-direction: column;
+            padding: 40px; box-sizing: border-box; /* 远离边距 */
         }
 
         /* 顶部面板 */
-        #header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: #292d3e;
-            border: 4px solid #000;
-            box-shadow: 4px 4px 0px #000;
-            margin-bottom: 10px;
+        #ui-top {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; border: 4px solid #fff; margin-bottom: 20px;
         }
 
-        #timer { color: var(--pixel-gold); font-size: 16px; }
+        /* 计时器闪烁效果 */
+        #timer { color: var(--pixel-gold); }
+        .low-time { color: var(--pixel-red) !important; animation: blink 0.5s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
 
-        /* 手牌区域 */
+        /* 手牌区域：允许卡牌溢出显示不规则感 */
         .hand-area {
-            display: flex;
-            justify-content: center;
-            padding: 10px;
-            min-height: 120px;
-            margin: 10px 0;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 150px; position: relative;
         }
 
+        /* 卡牌基础样式 */
         .card {
-            width: 70px;
-            height: 100px;
-            background: var(--pixel-card);
-            color: #000;
-            border: 4px solid var(--pixel-border);
-            margin-left: -35px;
-            display: flex;
-            flex-direction: column;
-            padding: 5px;
-            box-sizing: border-box;
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.1s;
+            width: 75px; height: 105px; background: var(--card-front);
+            color: #000; border: 3px solid #000;
+            margin-left: -40px; display: flex; flex-direction: column;
+            padding: 6px; box-sizing: border-box; cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            position: relative; box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
         }
 
-        .card:first-child { margin-left: 0; }
-        .card.selected { transform: translateY(-30px); border-color: var(--pixel-gold); }
+        /* 不规则偏移由 JS 动态生成，此处定义选中状态 */
+        .card.selected {
+            transform: translateY(-40px) scale(1.1) !important;
+            border-color: var(--pixel-gold); z-index: 100 !important;
+        }
+        
+        .card.back { background: #305080; border-color: #fff; }
         .card.red { color: var(--pixel-red); }
-        .card.back { background: var(--pixel-blue); border-color: #000; }
         .card .v { font-size: 14px; font-weight: bold; }
 
-        /* 桌面与信息 */
+        /* 桌面区 */
         #desk {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 4px dashed #3e445b;
-            position: relative;
+            flex: 1; border: 4px solid #2a2a3a; margin: 20px 0;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; position: relative; background: #1a1a26;
         }
+        .desk-msg { position: absolute; font-size: 12px; color: #555; }
 
-        .desk-slot { height: 110px; display: flex; justify-content: center; width: 100%; align-items: center; }
-
-        /* 像素化控制按钮 */
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            visibility: hidden;
-            height: 60px;
-        }
+        /* 按钮 UI */
+        .controls { display: flex; justify-content: center; gap: 20px; height: 60px; visibility: hidden; }
         .controls.active { visibility: visible; }
-
+        
         button {
-            padding: 10px 20px;
-            background: var(--pixel-gold);
-            border: 4px solid #000;
-            font-family: inherit;
-            font-size: 10px;
-            cursor: pointer;
-            box-shadow: -4px -4px 0px inset #00000044;
+            padding: 12px 20px; background: #fff; border: 4px solid #000;
+            font-family: inherit; font-size: 10px; cursor: pointer;
+            box-shadow: 4px 4px 0px var(--pixel-gold);
         }
         button:active { transform: translate(2px, 2px); box-shadow: none; }
-        button:disabled { background: #555; color: #888; cursor: not-allowed; }
+        button:disabled { background: #444; color: #777; box-shadow: none; }
 
-        /* 爆炸效果 */
-        @keyframes shake {
-            0% { transform: translate(2px, 2px); }
-            50% { transform: translate(-2px, -2px); }
-            100% { transform: translate(0, 0); }
-        }
-        .shake { animation: shake 0.1s infinite; }
+        /* 炸弹震动 */
+        .shake { animation: shake-anim 0.2s steps(2) infinite; }
+        @keyframes shake-anim { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="header">
-        <div>CPU:<span id="comp-count">27</span></div>
+<div id="stage">
+    <div id="ui-top">
+        <div>CPU HANDS:<span id="comp-count">0</span></div>
         <div id="timer">T-30</div>
-        <button onclick="initGame()">RESET</button>
+        <button onclick="initGame()" style="padding:5px;">RESET</button>
     </div>
 
     <div id="hand-1" class="hand-area"></div>
 
     <div id="desk">
-        <div id="desk-1" class="desk-slot"></div>
-        <div id="desk-0" class="desk-slot"></div>
+        <div class="desk-msg">BATTLE FIELD</div>
+        <div id="desk-1" class="hand-area"></div>
+        <div id="desk-0" class="hand-area"></div>
     </div>
 
     <div class="controls" id="ui">
-        <button id="btn-play" onclick="handlePlay()">PLAY</button>
+        <button id="btn-play" onclick="handlePlay()">PLAY CARD</button>
         <button id="btn-pass" onclick="handlePass()">PASS</button>
     </div>
 
@@ -146,10 +112,10 @@
 </div>
 
 <script>
-/** 核心逻辑：全牌型判定引擎 */
 const POWER = { '3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14,'2':15,'S':16,'B':17 };
 let G = { hands: [[], []], last: null, turn: 0, selected: new Set(), timeLeft: 30, timerInt: null };
 
+/** 游戏初始化 */
 function initGame() {
     let deck = [];
     for(let v in POWER) {
@@ -160,99 +126,97 @@ function initGame() {
     G.hands = [deck.slice(0, 27).sort((a,b)=>b.p-a.p), deck.slice(27, 54).sort((a,b)=>b.p-a.p)];
     G.last = null; G.turn = 0; G.selected.clear();
     renderAll();
-    startTimer();
+    resetTimer();
 }
 
-/** 牌型解析：支持所有合法组合 */
+/** 牌型解析 (同上一版但更严谨) */
 function getInfo(cards) {
     if(!cards.length) return null;
     let counts = {};
     cards.forEach(c => counts[c.p] = (counts[c.p] || 0) + 1);
-    let vals = Object.entries(counts).map(e=>({p:Number(e[0]), c:e[1]})).sort((a,b)=>b.c-a.c || a.p-b.p);
+    let vals = Object.entries(counts).map(e=>({p:Number(e[0]), c:e[1]})).sort((a,b)=>b.c-a.c || b.p-a.p);
     let len = cards.length;
-    let main = vals[0];
+    let m = vals[0];
 
-    // 1. 炸弹与王炸
-    if(main.c === 4 && len === 4) return { type: 'bomb', p: main.p, len: 4 };
-    if(len === 2 && cards[0].p >= 16 && cards[1].p >= 16) return { type: 'bomb', p: 99, len: 2 };
-
-    // 2. 单张、对子、三张
-    if(len === 1) return { type: 'single', p: main.p, len: 1 };
-    if(len === 2 && main.c === 2) return { type: 'pair', p: main.p, len: 2 };
-    if(len === 3 && main.c === 3) return { type: 'trio', p: main.p, len: 3 };
-
-    // 3. 三带一、三带二
-    if(len === 4 && main.c === 3) return { type: 'trio_1', p: main.p, len: 4 };
-    if(len === 5 && main.c === 3 && vals[1].c === 2) return { type: 'trio_2', p: main.p, len: 5 };
-
-    // 4. 四带二 (单张或两对)
-    if(len === 6 && main.c === 4) return { type: 'four_2', p: main.p, len: 6 };
-    if(len === 8 && main.c === 4 && vals[1].c === 2 && vals[2].c === 2) return { type: 'four_22', p: main.p, len: 8 };
-
-    // 5. 顺子 (单顺)
+    if(m.c === 4 && len === 4) return { type: 'bomb', p: m.p, len: 4, weight: 800 + m.p };
+    if(len === 2 && cards[0].p >= 16 && cards[1].p >= 16) return { type: 'bomb', p: 99, len: 2, weight: 1000 };
+    if(len === 1) return { type: 'single', p: m.p, len: 1 };
+    if(len === 2 && m.c === 2) return { type: 'pair', p: m.p, len: 2 };
+    if(len === 3 && m.c === 3) return { type: 'trio', p: m.p, len: 3 };
+    if(len === 4 && m.c === 3) return { type: 'trio_1', p: m.p, len: 4 };
+    if(len === 5 && m.c === 3 && vals[1].c === 2) return { type: 'trio_2', p: m.p, len: 5 };
     if(len >= 5 && vals.every(v => v.c === 1)) {
         let ps = vals.map(v => v.p).sort((a,b)=>a-b);
         if(ps[len-1] < 15 && ps[len-1]-ps[0] === len-1) return { type: 'straight', p: ps[0], len };
     }
-
-    // 6. 连对 (双顺)
-    if(len >= 6 && len % 2 === 0 && vals.every(v => v.c === 2)) {
-        let ps = vals.map(v => v.p).sort((a,b)=>a-b);
-        if(ps[ps.length-1] < 15 && ps[ps.length-1]-ps[0] === (len/2)-1) return { type: 'double_straight', p: ps[0], len };
-    }
-
-    // 7. 飞机 (简单版：两个连续三张，不带翼)
-    if(len >= 6 && len % 3 === 0 && vals.every(v => v.c === 3)) {
-        let ps = vals.map(v => v.p).sort((a,b)=>a-b);
-        if(ps[ps.length-1] < 15 && ps[ps.length-1]-ps[0] === (len/3)-1) return { type: 'airplane', p: ps[0], len };
-    }
-
     return null;
 }
 
-/** 强化AI逻辑 */
+/** ---------------- AI 强化算法 ---------------- **/
 function aiPlay() {
     const hand = G.hands[1];
     let toPlay = [];
 
     if(!G.last || G.last.player === 1) {
-        // 主动出牌：寻找手牌中连招最多的组合
-        toPlay = findBestCombination(hand);
+        toPlay = aiChooseLead(hand);
     } else {
         const lastI = getInfo(G.last.cards);
-        // 搜索同牌型
-        toPlay = searchMatch(hand, lastI);
-        // 如果没找到且手牌告急，出炸弹
-        if(!toPlay.length && hand.length < 10) toPlay = findBomb(hand, lastI);
+        toPlay = aiChooseResponse(hand, lastI);
     }
 
     if(toPlay.length) execute(toPlay); else handlePass();
 }
 
-function findBestCombination(hand) {
-    // AI 逻辑：优先打顺子，然后连对，然后对子，最后单张
-    let res = findStraight(hand, 5); // 尝试5连顺
-    if(res) return res;
-    let pairs = findPairs(hand);
-    if(pairs.length > 0) return pairs[0];
+// AI 主动出牌：寻找价值最大的长连牌
+function aiChooseLead(hand) {
+    // 优先尝试顺子 (从长到短)
+    for(let l=12; l>=5; l--) {
+        let s = findStraight(hand, l);
+        if(s) return s;
+    }
+    // 其次找三带
+    let trios = findGroups(hand, 3);
+    if(trios.length) return trios[0];
+    // 然后找对子
+    let pairs = findGroups(hand, 2);
+    if(pairs.length) return pairs[pairs.length-1]; // 出最小对
+    // 最后出最小单
     return [hand[hand.length-1]];
 }
 
-function searchMatch(hand, l) {
-    // 这里是一个简化的全牌型搜索算法
-    // 遍历手牌中所有可能的子集（此处针对单、对、三、顺、连对做优化）
-    for(let i=hand.length-1; i>=0; i--) {
-        for(let n=1; n<=Math.min(hand.length, 12); n++) {
-            if(i-n+1 < 0) continue;
-            let sub = hand.slice(i-n+1, i+1);
-            let info = getInfo(sub);
-            if(info && info.type === l.type && info.len === l.len && info.p > l.p) return sub;
-        }
-    }
-    return [];
+// AI 跟牌策略：权值判断
+function aiChooseResponse(hand, lInfo) {
+    let candidates = findAllMatches(hand, lInfo);
+    if(!candidates.length) return findBomb(hand, lInfo);
+
+    // 权值过滤：如果对方牌多，不舍得用大牌（如2或王）去压对方的小牌
+    let best = candidates[candidates.length-1]; // 默认选最小能压过的
+    let info = getInfo(best);
+    if(info.p >= 15 && G.hands[0].length > 10) return []; 
+    
+    return best;
 }
 
-// 辅助搜索器
+function findAllMatches(hand, l) {
+    let results = [];
+    // 简单滑动窗口搜索所有合法子集
+    for(let n=1; n<=Math.min(hand.length, 12); n++) {
+        for(let i=0; i<=hand.length-n; i++) {
+            let sub = hand.slice(i, i+n);
+            let info = getInfo(sub);
+            if(info && info.type === l.type && info.len === l.len && info.p > l.p) results.push(sub);
+        }
+    }
+    return results.sort((a,b) => getInfo(b).p - getInfo(a).p); // 降序，末尾最小
+}
+
+function findGroups(hand, size) {
+    let res = [];
+    let counts = {}; hand.forEach(c=>counts[c.p]=(counts[c.p]||0)+1);
+    for(let p in counts) if(counts[p]>=size) res.push(hand.filter(c=>c.p==p).slice(0,size));
+    return res;
+}
+
 function findStraight(hand, len) {
     let u = [...new Set(hand.map(c=>c.p))].filter(p=>p<15).sort((a,b)=>a-b);
     for(let i=0; i<=u.length-len; i++){
@@ -261,91 +225,103 @@ function findStraight(hand, len) {
     }
     return null;
 }
-function findPairs(hand) {
-    let res = [];
-    for(let i=0; i<hand.length-1; i++) if(hand[i].p === hand[i+1].p) res.push([hand[i], hand[i+1]]);
-    return res;
-}
+
 function findBomb(hand, lastI) {
-    let counts = {}; hand.forEach(c=>counts[c.p]=(counts[c.p]||0)+1);
-    for(let p in counts) if(counts[p]===4 && (lastI.type!=='bomb'||p>lastI.p)) return hand.filter(c=>c.p==p);
+    let bombs = findGroups(hand, 4);
+    if(bombs.length) {
+        let b = bombs[bombs.length-1];
+        if(lastI.type !== 'bomb' || getInfo(b).weight > lastI.weight) return b;
+    }
     let j = hand.filter(c=>c.p>=16);
-    if(j.length===2 && (lastI.type!=='bomb'||lastI.p<99)) return j;
+    if(j.length===2) return j;
     return [];
 }
 
-/** 流程控制 */
-function handlePlay() {
-    let cards = Array.from(G.selected).map(i => G.hands[0][i]);
-    let info = getInfo(cards);
-    if(!info) { alert("BAD COMBO!"); return; }
-    if(G.last && G.last.player !== 0) {
-        let l = getInfo(G.last.cards);
-        if(info.type==='bomb'){ if(l.type==='bomb' && info.p<=l.p) return; }
-        else { if(info.type!==l.type || info.len!==l.len || info.p<=l.p) return; }
-    }
-    if(info.type==='bomb') {
-        document.getElementById('desk').classList.add('shake');
-        setTimeout(()=>document.getElementById('desk').classList.remove('shake'), 400);
-    }
-    execute(cards);
-}
+/** ---------------- 游戏流程与渲染 ---------------- **/
 
 function execute(cards) {
     G.hands[G.turn] = G.hands[G.turn].filter(c => !cards.includes(c));
     G.last = { player: G.turn, cards };
-    document.getElementById(`desk-${G.turn}`).innerHTML = renderCards(cards);
+    if(getInfo(cards).type === 'bomb') triggerShake();
+    
+    document.getElementById(`desk-${G.turn}`).innerHTML = renderCards(cards, false);
     if(G.hands[G.turn].length === 0) {
-        alert(G.turn === 0 ? "YOU WIN" : "CPU WIN");
-        initGame();
-        return;
+        alert(G.turn === 0 ? "GAME OVER: YOU WIN!" : "GAME OVER: CPU WIN!");
+        initGame(); return;
     }
-    G.selected.clear();
-    G.turn = 1 - G.turn;
+    G.selected.clear(); G.turn = 1 - G.turn;
     document.getElementById(`desk-${G.turn}`).innerHTML = "";
     renderAll();
-    startTimer();
+    resetTimer();
     if(G.turn === 1) setTimeout(aiPlay, 800);
+}
+
+function handlePlay() {
+    let cards = Array.from(G.selected).map(i => G.hands[0][i]);
+    let info = getInfo(cards);
+    if(!info) return;
+    if(G.last && G.last.player !== 0) {
+        let l = getInfo(G.last.cards);
+        if(info.type==='bomb'){ if(l.type==='bomb' && info.weight<=l.weight) return; }
+        else { if(info.type!==l.type || info.len!==l.len || info.p<=l.p) return; }
+    }
+    execute(cards);
 }
 
 function handlePass() {
     if(!G.last || G.last.player === G.turn) return;
-    document.getElementById(`desk-${G.turn}`).innerHTML = "<div style='color:#555'>PASS</div>";
+    document.getElementById(`desk-${G.turn}`).innerHTML = "<div style='color:#444'>PASS</div>";
     G.turn = 1 - G.turn;
     document.getElementById(`desk-${G.turn}`).innerHTML = "";
-    renderAll();
-    startTimer();
+    renderAll(); resetTimer();
     if(G.turn === 1) setTimeout(aiPlay, 800);
 }
 
-function startTimer() {
-    clearInterval(G.timerInt);
-    G.timeLeft = 30;
+function resetTimer() {
+    clearInterval(G.timerInt); G.timeLeft = 30;
+    const el = document.getElementById('timer');
+    el.classList.remove('low-time');
     G.timerInt = setInterval(() => {
         G.timeLeft--;
-        document.getElementById('timer').innerText = `T-${G.timeLeft < 10 ? '0'+G.timeLeft : G.timeLeft}`;
+        el.innerText = `T-${G.timeLeft < 10 ? '0'+G.timeLeft : G.timeLeft}`;
+        if(G.timeLeft < 5) el.classList.add('low-time');
         if(G.timeLeft <= 0) G.turn === 0 ? handlePass() : aiPlay();
     }, 1000);
 }
 
 function renderAll() {
     document.getElementById('comp-count').innerText = G.hands[1].length;
-    document.getElementById('hand-1').innerHTML = G.hands[1].map(()=>`<div class="card back" style="margin-left:-45px"></div>`).join('');
-    document.getElementById('hand-0').innerHTML = G.hands[0].map((c, i) => `
-        <div class="card ${c.c} ${G.selected.has(i)?'selected':''}" onclick="toggleCard(${i})">
-            <span class="v">${c.v}</span><span style="font-size:8px">${c.s}</span>
-        </div>
-    `).join('');
+    // 电脑手牌渲染
+    document.getElementById('hand-1').innerHTML = G.hands[1].map(() => `<div class="card back" style="margin-left:-55px"></div>`).join('');
+    
+    // 玩家手牌渲染：加入随机倾斜与偏移
+    const h0 = document.getElementById('hand-0');
+    h0.innerHTML = "";
+    G.hands[0].forEach((c, i) => {
+        const deg = (Math.random() * 6 - 3).toFixed(1); // -3到3度
+        const offY = (Math.random() * 10 - 5).toFixed(1); // -5到5px
+        const div = document.createElement('div');
+        div.className = `card ${c.c} ${G.selected.has(i)?'selected':''}`;
+        div.style.transform = `rotate(${deg}deg) translateY(${offY}px)`;
+        div.innerHTML = `<span class="v">${c.v}</span><span style="font-size:8px; align-self:flex-end;">${c.s}</span>`;
+        div.onclick = () => { G.selected.has(i)?G.selected.delete(i):G.selected.add(i); renderAll(); };
+        h0.appendChild(div);
+    });
     document.getElementById('ui').className = G.turn === 0 ? 'controls active' : 'controls';
 }
 
-function toggleCard(i) {
-    if(G.selected.has(i)) G.selected.delete(i); else G.selected.add(i);
-    renderAll();
+function renderCards(cards, isBack) {
+    return cards.map(c => `
+        <div class="card ${c.c}" style="margin-left:-45px; transform:scale(0.85); cursor:default">
+            <span class="v">${c.v}</span><span>${c.s}</span>
+        </div>
+    `).join('');
 }
 
-function renderCards(cards) {
-    return cards.map(c => `<div class="card ${c.c}" style="margin-left:-40px; transform:scale(0.8); cursor:default"><span class="v">${c.v}</span><span>${c.s}</span></div>`).join('');
+function triggerShake() {
+    const d = document.getElementById('desk');
+    d.classList.add('shake');
+    setTimeout(() => d.classList.remove('shake'), 400);
 }
 
 initGame();
