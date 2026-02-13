@@ -1,26 +1,10 @@
-FROM python:2.7.15-slim
-
-WORKDIR /usr/src/app
-
+FROM python:3.9.22-alpine3.21
+WORKDIR /app
+COPY requirements.txt requirements.txt
+RUN pip3 config set global.index-url https://mirrors.aliyun.com/pypi/simple/ && \
+    pip3 install --no-cache-dir -r requirements.txt
 COPY . .
-
-RUN set -ex  \
-&& apt update \
-&& apt install -y build-essential python-dev\
-&& pip install --no-cache-dir -r requirements.txt \
-&& python manage.py collectstatic --noinput \
-&& apt remove build-essential -y \
-&& apt autoremove -y \ 
-&& mkdir /root/.netease-musicbox/ \
-&& touch /root/.netease-musicbox/musicbox.log \
-&& mkdir /usr/src/app/.netease-musicbox/ \
-&& touch /usr/src/app/.netease-musicbox/musicbox.log \
-&& echo "#LWP-Cookies-2.0" > /root/.netease-musicbox/cookie \
-&& echo "#LWP-Cookies-2.0" > /usr/src/app/.netease-musicbox/cookie
- 
-EXPOSE 80
-
-CMD cd /usr/src/app \
-&& exec gunicorn nem_parser.wsgi:application \
-    --bind 0.0.0.0:80 \
-    --workers 2
+RUN chmod +x /app/entrypoint.sh
+ENV TZ=Asia/Shanghai
+EXPOSE 5000
+CMD ["/app/entrypoint.sh"]

@@ -1,6 +1,10 @@
-version: '3'
 services:
-  web:
-    image: i1ssqspchlg9gh4/nem-downloader:latest
+  netease-url:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
     ports:
-     - "80:80"
+      - "5000:5000"
+    restart: unless-stopped
